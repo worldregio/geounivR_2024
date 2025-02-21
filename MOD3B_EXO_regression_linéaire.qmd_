@@ -1,0 +1,178 @@
+---
+title: "EXO - REGRESSION SIMPLE"
+format: 
+  html:
+    embed-resources: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(car)
+```
+
+## Objectif
+
+On se propose dans ce TD de modéliser la relation entre PIB par habiatnt (X) et émission de CO2 des pays africains (Y) en 2018.
+
+# 1. PREPARATION DES DONNEES
+
+## 1.1 Importation des données
+
+```{r}
+don<-read.csv2("DEV-AFRIC-2018/data/afrika_don.csv")
+head(don)
+```
+
+## 1.2 Sélection des variables
+
+```{r}
+# Création des variables X et X
+don$X<-don$PIB
+don$Y<-don$CO2HAB
+
+# Sélection des colonnes
+tab<-don[,c("iso3","name","X","Y")]
+
+# Elimination des lignes comportant des valeurs manquantes
+tab<-na.omit(tab)
+```
+
+## 1.3 Astuce : stockage des textes d'habillage
+
+```{r}
+nomX <- "PIB ($/hab)"
+nomY <- "Pollution (t. de CO2/hab)." 
+titre <- "Les pays Africains en 2018"
+note <- "Source : Rapport sur le développement humain 2020"
+```
+
+```{r, eval=FALSE}
+nomX <- "الناتج المحلي الإجمالي (بالدولار/الفرد)"
+nomY <- "التلوث (بالأطنان من ثاني أكسيد الكربون/الفرد)" 
+titre <- " البلدان الأفريقية في عام 2018"
+note <- " المصدر: تقرير التنمية البشرية 2020"
+```
+
+# 2. ANALYSE DES VARIABLES X et Y
+
+## 2.1 La distribution de X
+
+### Calculer les paramètres principaux de X et commentez les
+
+```{r}
+
+```
+
+-   **Commentaire :**
+
+### Faire un histogramme
+
+```{r}
+
+
+```
+
+-   **Commentaire :**
+
+### Tester la normalité
+
+```{r}
+
+```
+
+-   **Commentaire :**
+
+### Examiner la présence de valeurs exceptionnelles
+
+La solution la plus courante est d'utiliser une boxplot :
+
+```{r}
+
+
+```
+
+-   **Commentaire :**
+
+## 2.2 La distribution de Y
+
+## Calculer les paramètres principaux
+
+```{r}
+
+```
+
+-   **Commentaire :**
+
+### Faire un histogramme
+
+```{r}
+
+
+```
+
+-   **Commentaire :**
+
+### Tester la normalité
+
+```{r}
+
+```
+
+-   **Commentaire :**
+
+### Y-at_il des valeurs exceptionnelles ?
+
+```{r}
+
+
+```
+
+-   **Commentaire :**
+
+# 3. CORRELATION
+
+## 3.1 Visualiser la relation entre X et Y
+
+```{r}
+
+
+
+```
+
+-   **Commentaire :** :
+
+## 3.2 Tester la significativité de la relation entre X et Y
+
+```{r}
+
+```
+
+-   **Commentaire :** :
+
+# 4. REGRESSION LINEAIRE
+
+## 4.1 Calculer l'équation de la droite Y = aX+B
+
+```{r}
+
+```
+
+## 4.2 Visualiser la droite
+
+```{r}
+
+
+```
+
+-   **Commentaire:**
+
+## 4.3 Calculer les valeurs estimées et les résidus
+
+```{r}
+
+```
+
+-   **Commentaire** :
+
+# CONCLUSION

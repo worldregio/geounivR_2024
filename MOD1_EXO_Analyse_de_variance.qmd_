@@ -1,0 +1,152 @@
+---
+title: "EXO - ANALYSE DES INEGALITES DE REVENUS DANS LA REGION ..."
+format: 
+  html:
+    embed-resources: true
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning = FALSE)
+library(knitr)
+library(car)
+```
+
+L'objectif de cet exercice est de fournir une introduction aux modèles d'**analyse de variance simple ou multiples** dans lesquels une variable Y quantitative est fonction d'une ou plusieurs variables qualitatives X1, X2, X3...
+
+# 1. Données
+
+Nous allons importer un fichier de données portant sur les revenus de 17 000 ménages tunisiens en 2021. Il est tiré de l'Enquête Nationale sur le Budget et la Consommation des Ménages réalisée par l'INS et publiée sur son site.
+
+## Importation des données
+
+On commence par charger les données contenues dans le fichier *enq_INS_conso_menages_2021.RDS* à l'aide de la fonction `readRDS()` qui permet de lire les fichiers sauvegardés dans le format interne de R et on affiche les 6 premières lignes :
+
+```{r}
+# Importe les données au format interne de R
+base<-readRDS("ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS") 
+
+head(base)
+```
+
+## Liste des variables
+
+On a légèrement changé le fichier initial de l'INS en simplifiant les noms des variables et en fusionnant certaines modalités. Nous avons décidé de retirer les données incomplètes pour lesquels il manque des informations telles que le sexe, l'âge ou la profession du chef de ménage. Pour cette raison les résultats obtenus seront très légèrement différents de ceux présentés sur le site de l'INS.
+
+Les variables proposées sont les suivantes :
+
+-   id : identifiant du ménage de 1 à 17114
+
+-   reg : région de résidence (GT = Grand Tunis, NE = Nord-Est, ...)
+
+-   mil : milieu de résidence (urbain ou rural)
+
+-   sex : sexe du chef de ménage
+
+-   age : âge du chef de ménage
+
+-   mat : situation matrimoniale du chef de ménage (célibataire, marié, veuf, divorcé)
+
+-   ins : niveau d'instruction du chef de ménage (aucune, primaire, secondaire, supérieur)
+
+-   csp : catégorie socio-professionnelle du chef de ménage (simplifiée par rapport au fichier de l'INS)
+
+-   nbp : nombre de personnes composant le ménage
+
+-   pvr : situation de pauvreté selon les critères de l'INS, c'est-à-dire en tenant compte par exemple du coût de la vie dans la région de résidence (Oui/Non)
+
+-   rev : revenu annuel moyen divisé par le nombre de personnes du ménage (en DT / an)
+
+## Selection du tableau à analyser
+
+On suppose qu'on ne s'intéresse qu'à quelques variables
+
+```{r}
+don<-base[,c("reg","mil","sex", "ins", "age","rev")]
+head(don)
+```
+
+## Selection d'une région de Tunisie
+
+Vous allez choisir l'une des 7 régions de Tunisie (GT, NO, NE, CO, CE, SO, SE)
+
+```{r}
+don<-don[don$reg=="GT",]
+```
+
+## Résumé rapide
+
+On effectue un résumé rapide du tableau à l'aide de la fonction `summary()`:
+
+```{r}
+summary(don)
+```
+
+# 2. Variable dépendante (Y)
+
+On se propose d'expliquer la variable *revenu annuel moyen par membre du ménage* que l'on appellera par la suite de façon abrégée *revenu annuel moyen*. On va commencer par analyser rapidement les caractéristiques dela distribution statistique de cette variable.
+
+## Paramètres principaux
+
+Un résumé rapide est obtenu à l'aide de la fonction `summary()` que l'on complète par le calcul de l'écart-type et du coefficient de variation.
+
+```{r}
+
+```
+
+## Forme de la distribution
+
+On devine à l'aide des résultats précédents que la distribution comporte des valeurs exceptionnelles et doit être fortement dissymétriques à gauche.
+
+```{r}
+
+```
+
+## Transformation logarithmique
+
+On décide de transformer la variable en son logarithme ce qui est une pratique courante lorsqu'on analyse les revenus des ménages. On espère ainsi que la nouvelle distribution deviendra plus symétrique voire gaussienne ce qui signifierait qu'elle est **log-normale**.
+
+```{r}
+don$logrev<-log(don$rev)
+
+
+```
+
+# 3. Analyse de variance simple
+
+On va tester tour à tour chacune des différentes variables qualitatives sélectionnées.
+
+## Modèle 1 : Le revenu moyen annuel est-il différent en milieu urbain et en milieu rural ?
+
+```{r}
+
+```
+
+## Modèle 2 : Le revenu moyen annuel est-il lié au genre du chef de ménage ?
+
+```{r}
+
+```
+
+Que pouvez-vous dire des résultats ?
+
+## Modèle 3 : Le revenu des habitant·es est-il lié au niveau d'instruction du chef de ménage ?
+
+Même programme mais avec une variable qualitative ayant quatre niveaux.
+
+```{r}
+
+```
+
+## Modèle 4 : Le revenu des habitant·es est-il lié à l'âge du chef de ménage ?
+
+Vous devez transformer la variable `age` en classes qui doivent être bien réfléchies car elles vont conditionner les résultats.
+
+```{r}
+
+```
+
+On peut alors appliquer le même programme que précédemment :
+
+```{r}
+
+```

@@ -1,0 +1,1374 @@
+[
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html",
+    "href": "STAT2A_biv_quali_quali_cours.html",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "Nous allons importer un fichier de données portant sur les revenus de 17000 ménages tunisiens en 2021. Il est tiré de l’enquête consommation et revenu de l’INS que l’on peut télécharger librement en cliquant ici\n\n\nOn commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS() qui permet de lire les fichiers sauvegardés sans le format interne de R et on affiche les 6 premières lignes\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\")  \n\n\n\n\nOn a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Les variables proposées sont les suivantes :\n\nid : identifiant du ménages de 1 à 17114\nreg : région de résidence (NE, NO, CE, CO, SE, SO + Grand Tunis)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : age du chef de ménage\nmat : situation matrimoniale (célbataire, marié, veuf, divorcé)\nins : instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio professionnelle du chef de ménage (simplifiée)\nnbp : nombre de personnes composant le ménage\npauv: situation de pauvreté selon les critères de l’INS (Oui/Non)\nrev : revenu moyen par personnes en DT / an\n\n\n\n\nOn suppose qu’on ne s’intéresse qu’à quelques variables de type qualitatif.\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\",\"ins\",\"pvr\")]\nhead(don)\n\n  reg    mil   sex        ins   pvr\n1  GT urbain homme   primaire FALSE\n2  GT urbain homme   primaire FALSE\n3  GT urbain femme secondaire FALSE\n4  GT urbain homme   primaire FALSE\n5  GT urbain homme secondaire FALSE\n6  GT urbain homme   primaire FALSE\n\n\n\n\n\nLa variable pvr exprime sous forme logique le fait qu’un ménage soit riche ou pauvre. Elle a été créée par l’INS en tenant compte du revenu, du nombre de personnes mais aussi de la région et du milieu rural ou urbain. Un revenu de 1000 Dt n’aura en effet pas le même effet selon qu’on habite à Tunis ou Sidi Bouzid.\nOn décide de la recoder en “Pauvre”, “Non Pauvre”.\n\n# Transforme du type logic au type factor\ndon$pvr&lt;-as.factor(don$pvr)\n\n# Examine les étiquettes\ntable(don$pvr)\n\n\nFALSE  TRUE \n14665  2449 \n\n# Change les étiquettes \nlevels(don$pvr)&lt;-c(\"Non pauvre\",\"Pauvre\")\n\n# Examine les nouvelles étiquettes\ntable(don$pvr)\n\n\nNon pauvre     Pauvre \n     14665       2449 \n\n\n\n\n\nOn effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex                ins               pvr       \n GT:3944   urbain:10836   homme:13996   aucun     :3742   Non pauvre:14665  \n NE:2458   rural : 6278   femme: 3118   primaire  :6979   Pauvre    : 2449  \n NO:2502                                secondaire:4647                     \n CE:2862                                supérieur :1746                     \n CO:2330                                                                    \n SE:1845                                                                    \n SO:1173"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#importation-des-données",
+    "href": "STAT2A_biv_quali_quali_cours.html#importation-des-données",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS() qui permet de lire les fichiers sauvegardés sans le format interne de R et on affiche les 6 premières lignes\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\")"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#liste-des-variables",
+    "href": "STAT2A_biv_quali_quali_cours.html#liste-des-variables",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Les variables proposées sont les suivantes :\n\nid : identifiant du ménages de 1 à 17114\nreg : région de résidence (NE, NO, CE, CO, SE, SO + Grand Tunis)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : age du chef de ménage\nmat : situation matrimoniale (célbataire, marié, veuf, divorcé)\nins : instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio professionnelle du chef de ménage (simplifiée)\nnbp : nombre de personnes composant le ménage\npauv: situation de pauvreté selon les critères de l’INS (Oui/Non)\nrev : revenu moyen par personnes en DT / an"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#selection-du-tableau-à-analyser",
+    "href": "STAT2A_biv_quali_quali_cours.html#selection-du-tableau-à-analyser",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On suppose qu’on ne s’intéresse qu’à quelques variables de type qualitatif.\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\",\"ins\",\"pvr\")]\nhead(don)\n\n  reg    mil   sex        ins   pvr\n1  GT urbain homme   primaire FALSE\n2  GT urbain homme   primaire FALSE\n3  GT urbain femme secondaire FALSE\n4  GT urbain homme   primaire FALSE\n5  GT urbain homme secondaire FALSE\n6  GT urbain homme   primaire FALSE"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#recodage-de-la-variable-pvr",
+    "href": "STAT2A_biv_quali_quali_cours.html#recodage-de-la-variable-pvr",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "La variable pvr exprime sous forme logique le fait qu’un ménage soit riche ou pauvre. Elle a été créée par l’INS en tenant compte du revenu, du nombre de personnes mais aussi de la région et du milieu rural ou urbain. Un revenu de 1000 Dt n’aura en effet pas le même effet selon qu’on habite à Tunis ou Sidi Bouzid.\nOn décide de la recoder en “Pauvre”, “Non Pauvre”.\n\n# Transforme du type logic au type factor\ndon$pvr&lt;-as.factor(don$pvr)\n\n# Examine les étiquettes\ntable(don$pvr)\n\n\nFALSE  TRUE \n14665  2449 \n\n# Change les étiquettes \nlevels(don$pvr)&lt;-c(\"Non pauvre\",\"Pauvre\")\n\n# Examine les nouvelles étiquettes\ntable(don$pvr)\n\n\nNon pauvre     Pauvre \n     14665       2449"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#résumé-rapide",
+    "href": "STAT2A_biv_quali_quali_cours.html#résumé-rapide",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex                ins               pvr       \n GT:3944   urbain:10836   homme:13996   aucun     :3742   Non pauvre:14665  \n NE:2458   rural : 6278   femme: 3118   primaire  :6979   Pauvre    : 2449  \n NO:2502                                secondaire:4647                     \n CE:2862                                supérieur :1746                     \n CO:2330                                                                    \n SE:1845                                                                    \n SO:1173"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#création",
+    "href": "STAT2A_biv_quali_quali_cours.html#création",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Création",
+    "text": "Création\nLe coeur du travail d’analyse du questionnaire est la réalisation de tris croisés c’est-à-dire de tableaux de contingence croisant les réponses à deux questions (X et Y). Prenons comme exemple la pauvreté du ménage (pvr) définie par l’INS comme une variable binaire (Y) et le niveau d’instruction (ins) du chef de ménage (X) en quatre classes.\n\ntableau de contingence\n\nX&lt;-don$ins\nY&lt;-don$pvr\ntab&lt;-table(X,Y)\naddmargins(tab)\n\n            Y\nX            Non pauvre Pauvre   Sum\n  aucun            3098    644  3742\n  primaire         5755   1224  6979\n  secondaire       4145    502  4647\n  supérieur        1667     79  1746\n  Sum             14665   2449 17114\n\n\nExemple de lecture : 644 ménages ont un chef sans diplôme et sont pauvres."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#pourcentage-en-ligne",
+    "href": "STAT2A_biv_quali_quali_cours.html#pourcentage-en-ligne",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Pourcentage en ligne",
+    "text": "Pourcentage en ligne\nLe tableau de contingence permet de produire différents tableaux de pourcentage.\n\nlprop(tab)\n\n            Y\nX            Non pauvre Pauvre Total\n  aucun       82.8       17.2  100.0\n  primaire    82.5       17.5  100.0\n  secondaire  89.2       10.8  100.0\n  supérieur   95.5        4.5  100.0\n  All         85.7       14.3  100.0\n\n\nExemple de lecture : 17.2% des ménages dont le chef n’a pas de diplôme sont pauvres"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#pourcentage-en-colonnes",
+    "href": "STAT2A_biv_quali_quali_cours.html#pourcentage-en-colonnes",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "pourcentage en colonnes",
+    "text": "pourcentage en colonnes\nLe tableau de contingence permet de produire différents tableaux de pourcentage.\n\ncprop(tab)\n\n            Y\nX            Non pauvre Pauvre All  \n  aucun       21.1       26.3   21.9\n  primaire    39.2       50.0   40.8\n  secondaire  28.3       20.5   27.2\n  supérieur   11.4        3.2   10.2\n  Total      100.0      100.0  100.0\n\n\nExemple de lecture : 26.3% des ménages pauvres ont pour chef une personne non diplômée"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#pourcentage-du-total",
+    "href": "STAT2A_biv_quali_quali_cours.html#pourcentage-du-total",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "pourcentage du total",
+    "text": "pourcentage du total\n\nprop(tab)\n\n            Y\nX            Non pauvre Pauvre Total\n  aucun       18.1        3.8   21.9\n  primaire    33.6        7.2   40.8\n  secondaire  24.2        2.9   27.2\n  supérieur    9.7        0.5   10.2\n  Total       85.7       14.3  100.0\n\n\nExemple de lecture : 3.8% des ménages sont pauvres et ont pour chef une personne non diplômée"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#utilisation-de-mosaicplot",
+    "href": "STAT2A_biv_quali_quali_cours.html#utilisation-de-mosaicplot",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Utilisation de mosaicplot",
+    "text": "Utilisation de mosaicplot\nIl est facile de visualiser un tableau de contingence avec mosaicplot()\n\nmosaicplot(tab)\n\n\n\n\nCette figure est très pratique car elle montre à la fois l’effectif des ménages par diplôme (largeur de la barre) et la proportion de ménages pauvres (hauteur à laquelle la barre est coupée)"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#figure-améliorée",
+    "href": "STAT2A_biv_quali_quali_cours.html#figure-améliorée",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "figure améliorée",
+    "text": "figure améliorée\nOn peut ensuite améliorer le figure\n\nmosaicplot(tab,\n           xlab = \"Diplôme du chef de ménage\",\n           ylab = \"Pauvreté\",\n           main = \"Relation entre diplome et pauvreté en Tunisie en 2021\",\n           sub = \"Source : INS, 2021\",\n           col=c(\"lightyellow\", \"orange\"))"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#hypothèse-de-recherche",
+    "href": "STAT2A_biv_quali_quali_cours.html#hypothèse-de-recherche",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Hypothèse de recherche",
+    "text": "Hypothèse de recherche\nOn remarque qu’il semble exister un lien entre le niveau de diplôme du chef de ménage. Cette relation semble négative puisque les ménages les moins instruits sont ceux qui sont le plus souvent pauvre. On a donc envie d’affirmer l’hypothèse de recherche H1 :\nH1: Dans le cas de la population tunisienne en 2021, il existe un lien entre le niveau de diplôme du chef de ménage (X) et la situation de pauvreté (Y).\nEn statistique, on ne teste jamais directement l’hypothèse H1 (il y a une relation entre X et Y) mais on teste l’hypothèse inverse (il n’y a pas de relation entre X et Y) qu’on appelle hypothèse nulle."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#hypothèse-nulle",
+    "href": "STAT2A_biv_quali_quali_cours.html#hypothèse-nulle",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Hypothèse nulle",
+    "text": "Hypothèse nulle\nPourquoi cette complication apparente ?\n\nParce que l’hypothèse nulle est plus rigoureuse et revient à se demander si ce n’est pas le hasard qui explique les différence de pourcentage observées. Dans notre exemple on va donc poser :\n\nH0 : Il n’y a pas de relation entre le niveau de diplôme (X) et le fait d’être pauvre (Y). Les différences de pourcentage que nous avons mises en évidence peuvent très bien être l’effet du hasard."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#la-fonction-chisq.test",
+    "href": "STAT2A_biv_quali_quali_cours.html#la-fonction-chisq.test",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "La fonction chisq.test()",
+    "text": "La fonction chisq.test()\nCette fonction très puissance s’applique à un tableau de contingence créé avec la fonction table(). Elle renvoie un gros objet que l’on va stocker pour en extraire les résultats dont on a besoin. On peut choisir le nom de l’objet dans lequel seront stockés les résultats. Ici je vais choisir le nom resul mais j’aurais aussi bien pu l’appeler toto ou titi.\n\nresul&lt;-chisq.test(tab)\nclass(resul)\n\n[1] \"htest\"\n\n\nL’instruction class() nousindique que l’objet a un type spécial appelé htest. Il s’agit en fait d’une liste de résultats, comme un gros sac de course remplis de fruits, légumes, pain, etc.\nQu’y a-t-il dans l’objet resul ?\n\nstr(resul)\n\nList of 9\n $ statistic: Named num 268\n  ..- attr(*, \"names\")= chr \"X-squared\"\n $ parameter: Named int 3\n  ..- attr(*, \"names\")= chr \"df\"\n $ p.value  : num 8.6e-58\n $ method   : chr \"Pearson's Chi-squared test\"\n $ data.name: chr \"tab\"\n $ observed : 'table' int [1:4, 1:2] 3098 5755 4145 1667 644 1224 502 79\n  ..- attr(*, \"dimnames\")=List of 2\n  .. ..$ X: chr [1:4] \"aucun\" \"primaire\" \"secondaire\" \"supérieur\"\n  .. ..$ Y: chr [1:2] \"Non pauvre\" \"Pauvre\"\n $ expected : num [1:4, 1:2] 3207 5980 3982 1496 535 ...\n  ..- attr(*, \"dimnames\")=List of 2\n  .. ..$ X: chr [1:4] \"aucun\" \"primaire\" \"secondaire\" \"supérieur\"\n  .. ..$ Y: chr [1:2] \"Non pauvre\" \"Pauvre\"\n $ residuals: 'table' num [1:4, 1:2] -1.92 -2.91 2.58 4.42 4.69 ...\n  ..- attr(*, \"dimnames\")=List of 2\n  .. ..$ X: chr [1:4] \"aucun\" \"primaire\" \"secondaire\" \"supérieur\"\n  .. ..$ Y: chr [1:2] \"Non pauvre\" \"Pauvre\"\n $ stdres   : 'table' num [1:4, 1:2] -5.73 -10.01 8 12.32 5.73 ...\n  ..- attr(*, \"dimnames\")=List of 2\n  .. ..$ X: chr [1:4] \"aucun\" \"primaire\" \"secondaire\" \"supérieur\"\n  .. ..$ Y: chr [1:2] \"Non pauvre\" \"Pauvre\"\n - attr(*, \"class\")= chr \"htest\"\n\n\nPlein de choses …"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#distribution-observée",
+    "href": "STAT2A_biv_quali_quali_cours.html#distribution-observée",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Distribution observée",
+    "text": "Distribution observée\nOn retrouve dans l’objet resul notre tableau de contingence initial\n\nNij = effectifs observés\n\ntabobs &lt;- resul$observed\naddmargins(tabobs)\n\n            Y\nX            Non pauvre Pauvre   Sum\n  aucun            3098    644  3742\n  primaire         5755   1224  6979\n  secondaire       4145    502  4647\n  supérieur        1667     79  1746\n  Sum             14665   2449 17114"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#distribution-théorique",
+    "href": "STAT2A_biv_quali_quali_cours.html#distribution-théorique",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Distribution théorique",
+    "text": "Distribution théorique\nAfin de voir si le hasard est effectivement intervenu, on va reconstituer ce que serait le tableau de contingence croisant X et Y dans le cas où les deux variables ne sont pas reliées. On extrait cette information de l’objet resul la partie appelée expected.\n\nTij = (Ni. x N.j)/N..\n\ntabtheo &lt;- resul$expected\nround(addmargins(tabtheo),1)\n\n            Y\nX            Non pauvre Pauvre   Sum\n  aucun          3206.5  535.5  3742\n  primaire       5980.3  998.7  6979\n  secondaire     3982.0  665.0  4647\n  supérieur      1496.1  249.9  1746\n  Sum           14665.0 2449.0 17114"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#résidus",
+    "href": "STAT2A_biv_quali_quali_cours.html#résidus",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Résidus",
+    "text": "Résidus\nOn va ensuite mesurer les écarts entre effectifs observés et théoriques appelés résidus (Nij-Tij).\n\nRésidus (Nij-Tij)\n\ntabresid &lt;- tabobs-tabtheo\nround(addmargins(tabresid),1)\n\n            Y\nX            Non pauvre Pauvre    Sum\n  aucun          -108.5  108.5    0.0\n  primaire       -225.3  225.3    0.0\n  secondaire      163.0 -163.0    0.0\n  supérieur       170.9 -170.9    0.0\n  Sum               0.0    0.0    0.0"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#chi-2",
+    "href": "STAT2A_biv_quali_quali_cours.html#chi-2",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Chi-2",
+    "text": "Chi-2\nOn va ensuite exprimer les écartes entre effectifs observés et estimés sous une forme mathématique appelée chi2 définie par la formule (Nij-Tij)x(Nij-Tij)/Tij. Ce résultat n’est pas fourni mais on peut le calculer :\n\nChi-2 = (Nij-Tij)x(Nij-Tij)/Tij\n\ntabchi2&lt;-(tabobs-tabtheo)**2 / tabtheo\nround(addmargins(tabchi2),1)\n\n            Y\nX            Non pauvre Pauvre   Sum\n  aucun             3.7   22.0  25.7\n  primaire          8.5   50.8  59.3\n  secondaire        6.7   39.9  46.6\n  supérieur        19.5  116.8 136.3\n  Sum              38.3  229.6 267.9\n\n\nCe qui nous intéresse c’est la somme du chi2 de toutes les cases qui mesure la différence entre les distributions observées et théoriques. Plus le chi2 total est grand, plus il y a de chance qu’il existe une relation entre X et Y."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#test-du-chi-2-1",
+    "href": "STAT2A_biv_quali_quali_cours.html#test-du-chi-2-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "test du chi-2",
+    "text": "test du chi-2\nOn peut calculer beaucoup plus rapidement le chi-2 total d’un tableau et sa significativité en utilisant la fonction chisq.test() sans la stocker :\n\nchisq.test(tab)\n\n\n    Pearson's Chi-squared test\n\ndata:  tab\nX-squared = 267.94, df = 3, p-value &lt; 2.2e-16\n\n\nOn obtient directement la valeur du chi-2 du tableau (X-squared = 267.94) ainsi que le nombre de degrés de libertés (df = 3) et la significativité de la relation (p-value &lt; 2.2e-16)"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#interprétation-du-résultat-du-test",
+    "href": "STAT2A_biv_quali_quali_cours.html#interprétation-du-résultat-du-test",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Interprétation du résultat du test",
+    "text": "Interprétation du résultat du test\nLe chi-2 total du tableau (267.9) sera d’autant plus élevé que la distribution observée s’éloigne de la distribution théorique. Plus le chi-2 augmente, moins il y a de chance que le hasard explique les différences entre valeurs observées et estimées. On peut alors faire un test pour connaître la probabilité que le chi-2 observé soit l’effet du hasard.\n\nle tableau possède 3 degré de liberté = (lignes - 1) x (colonnes - 1)\nle tableau possède un chi-2 égal à 267.9\nUn calcul effectué par un logiciel de statistique montre que la probabilité que cette valeur soit l’effet du hasard (p-value) est presque nulle p &lt;0.0001\n\nOn va donc rejeter H0 et accepter H1\nConclusion : On peut affirmer sans grand risque d’erreur (1 chance sur 10 000) qu’en Tunisie en 2021 il existe une relation significative entre le niveau de diplôme du chef de ménage et la situation de pauvreté"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#seuils-de-décision",
+    "href": "STAT2A_biv_quali_quali_cours.html#seuils-de-décision",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Seuils de décision",
+    "text": "Seuils de décision\nDans l’exemple précédent, nous sommes tombé sur une relation très significative. Mais ce n’est pas toujours le cas. Pour fixer les ordres de grandeur, voici un tableau simple à retenir :\n\n\n\n\n\nTest..p.value.\nInterprétation\ncode\n\n\n\n\n&gt; 0.10\nNon significatif\nn.s\n\n\n0.05 à 0.10\nPresque significatif\n.\n\n\n0.01 à 0.05\nlégèrement significatif\n*\n\n\n0.001 à 0.01\nsignificatif\n**\n\n\n0.001 &lt;\ntrès significatif\n***\n\n\n\n\n\nLa taille de l’échantillon influence beaucoup le résultat du test du chi-2. Plus l’échantillon est grand, plus on a de chances de rejeter H0. ici nous avions 17000 personnes ce qui est considérable pourune enquête.\nMais qu’aurions nous observée si nous n’avions eu que 50, 100 ou 200 personnes ?"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#taille-de-léchantillon-n50",
+    "href": "STAT2A_biv_quali_quali_cours.html#taille-de-léchantillon-n50",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Taille de l’échantillon (n=50)",
+    "text": "Taille de l’échantillon (n=50)\n\n\n\n\n\nEffectif\n\n\n\nNon pauvre\nPauvre\nSum\n\n\n\n\naucun\n8\n1\n9\n\n\nprimaire\n21\n3\n24\n\n\nsecondaire\n13\n0\n13\n\n\nsupérieur\n4\n0\n4\n\n\nSum\n46\n4\n50\n\n\n\n\n\n\n% en ligne\n\n\n\nNon pauvre\nPauvre\nTotal\n\n\n\n\naucun\n88.9\n11.1\n100\n\n\nprimaire\n87.5\n12.5\n100\n\n\nsecondaire\n100.0\n0.0\n100\n\n\nsupérieur\n100.0\n0.0\n100\n\n\nAll\n92.0\n8.0\n100\n\n\n\n\n\n\n\n\n\n\n\n\n    Pearson's Chi-squared test\n\ndata:  tab\nX-squared = 2.2569, df = 3, p-value = 0.5208"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#taille-de-léchantillon-n100",
+    "href": "STAT2A_biv_quali_quali_cours.html#taille-de-léchantillon-n100",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Taille de l’échantillon (n=100)",
+    "text": "Taille de l’échantillon (n=100)\n\n\n\n\n\nEffectif\n\n\n\nNon pauvre\nPauvre\nSum\n\n\n\n\naucun\n17\n4\n21\n\n\nprimaire\n35\n6\n41\n\n\nsecondaire\n28\n1\n29\n\n\nsupérieur\n8\n1\n9\n\n\nSum\n88\n12\n100\n\n\n\n\n\n\n% en ligne\n\n\n\nNon pauvre\nPauvre\nTotal\n\n\n\n\naucun\n81.0\n19.0\n100\n\n\nprimaire\n85.4\n14.6\n100\n\n\nsecondaire\n96.6\n3.4\n100\n\n\nsupérieur\n88.9\n11.1\n100\n\n\nAll\n88.0\n12.0\n100\n\n\n\n\n\n\n\n\n\n\n\n\n    Pearson's Chi-squared test\n\ndata:  tab\nX-squared = 3.2722, df = 3, p-value = 0.3515"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_cours.html#taille-de-léchantillon-n200",
+    "href": "STAT2A_biv_quali_quali_cours.html#taille-de-léchantillon-n200",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Taille de l’échantillon (n=200)",
+    "text": "Taille de l’échantillon (n=200)\n\n\n\n\n\nEffectif\n\n\n\nNon pauvre\nPauvre\nSum\n\n\n\n\naucun\n29\n9\n38\n\n\nprimaire\n77\n15\n92\n\n\nsecondaire\n48\n4\n52\n\n\nsupérieur\n15\n3\n18\n\n\nSum\n169\n31\n200\n\n\n\n\n\n\n% en ligne\n\n\n\nNon pauvre\nPauvre\nTotal\n\n\n\n\naucun\n76.3\n23.7\n100\n\n\nprimaire\n83.7\n16.3\n100\n\n\nsecondaire\n92.3\n7.7\n100\n\n\nsupérieur\n83.3\n16.7\n100\n\n\nAll\n84.5\n15.5\n100\n\n\n\n\n\n\n\n\n\n\n\n\n    Pearson's Chi-squared test\n\ndata:  tab\nX-squared = 4.4277, df = 3, p-value = 0.2188"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#importation-des-données",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#importation-des-données",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Importation des données",
+    "text": "Importation des données\n\n\n# Importe les données\nlibrary(readxl)\ndon&lt;-read_xlsx(path = \"TUN-CLIMAT/tun_climat.xlsx\",\n              sheet = \"data\")\nkable(don, caption = \"Tableau de données\")\n\n\n\nTableau de données\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ncode\nnom\nreg_code\nreg_nom\nlat\nlon\nalt\ntmin\ntmax\ntmoy\nprec\nvent\nrosee\n\n\n\n\nBJ\nBeja\nNO\nNord-ouest\n36.73333\n9.183333\n159.00\n11.45894\n24.62033\n18.55692\n590.000\n6.436291\n10.881502\n\n\nBZ\nBizerte\nNE\nNord-est\n37.24545\n9.791453\n6.09\n13.36735\n23.96475\n18.73467\n639.000\n13.080826\n13.507263\n\n\nGB\nGabes\nSE\nSud-est\n33.87692\n10.103333\n7.92\n15.62121\n25.44585\n20.64563\n192.000\n11.564158\n12.396331\n\n\nGF\nGafsa\nSO\nSud-ouest\n34.42202\n8.822503\n323.08\n13.73596\n26.88865\n20.42736\n163.000\n12.759514\n7.894512\n\n\nJE\nJendouba\nNO\nNord-ouest\n36.48333\n8.800000\n144.00\n12.03502\n25.75739\n19.17381\n458.000\n8.187385\n11.549468\n\n\nKR\nKairouan\nCO\nCentre-ouest\n35.66667\n10.100000\n68.00\n15.05704\n27.37991\n20.88537\n303.000\n5.826256\n10.894726\n\n\nKS\nKasserine\nCO\nCentre-ouest\n35.16667\n8.833333\n707.00\n11.47720\n24.13852\n18.46683\n340.000\n12.853035\n8.366253\n\n\nKB\nKebili\nSO\nSud-ouest\n33.70000\n8.966667\n46.00\n15.34825\n28.66706\n22.71979\n89.000\n14.061362\n10.373775\n\n\nKF\nLe Kef\nNO\nNord-ouest\n36.13333\n8.700000\n518.00\n10.30506\n23.19958\n17.24170\n528.000\n8.246948\n8.059934\n\n\nMH\nMahdia\nCE\nCentre-est\n35.50000\n11.066667\n12.00\n16.50674\n23.29379\n20.16491\n290.000\n10.854368\n14.624500\n\n\nME\nMedenine\nSE\nSud-est\n33.35000\n10.483333\n117.00\n16.17117\n27.56439\n22.57362\n159.000\n8.743863\n11.404804\n\n\nMS\nMonastir\nCE\nCentre-est\n35.66667\n10.750000\n2.00\n15.64783\n24.26410\n19.76152\n322.062\n13.888661\n13.587094\n\n\nNB\nNabeul\nNE\nNord-est\n36.46667\n10.700000\n78.00\n15.70167\n23.43309\n19.81197\n450.000\n12.190401\n14.033335\n\n\nSF\nSfax\nCE\nCentre-est\n34.71795\n10.690972\n25.90\n14.88812\n25.24082\n20.05744\n221.000\n11.408961\n12.427977\n\n\nSZ\nSidi Bou Zid\nCO\nCentre-ouest\n35.00000\n9.483333\n355.00\n13.03144\n26.20685\n20.25616\n280.000\n8.283933\n9.461638\n\n\nSL\nSiliana\nNO\nNord-ouest\n36.06667\n9.366667\n445.00\n11.36109\n24.50220\n19.02255\n389.000\n9.242761\n9.455365\n\n\nSS\nSousse\nCE\nCentre-est\n35.70000\n10.600000\n5.00\n15.70000\n24.40000\n19.90000\n310.000\n12.500000\n13.600000\n\n\nTA\nTataouine\nSE\nSud-est\n32.91667\n10.450000\n215.00\n15.90320\n27.20100\n21.41218\n110.000\n10.298155\n9.182343\n\n\nTO\nTozeur\nSO\nSud-ouest\n33.93972\n8.110556\n87.47\n16.83189\n28.64269\n22.63410\n97.000\n14.732460\n8.697420\n\n\nTU\nTunis\nNE\nNord-est\n36.85103\n10.227217\n6.70\n14.26899\n24.61744\n19.14238\n453.000\n13.405618\n12.626422\n\n\nZA\nZaghouan\nNE\nNord-est\n36.43333\n10.083333\n156.00\n12.43361\n25.06573\n18.57657\n501.000\n10.331711\n11.907365"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#liste-des-variables",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#liste-des-variables",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Liste des variables",
+    "text": "Liste des variables\nOn charge ensuite le fichier des métadonnées:\n\n\n# Importe les métadonnées\nmeta&lt;-read_xlsx(path = \"TUN-CLIMAT/tun_climat.xlsx\",\n              sheet = \"meta\")\nkable(meta, caption = \"Tableau de métadonnées\")\n\n\n\nTableau de métadonnées\n\n\nvariable\ndef\n\n\n\n\ncode\ncode de la station\n\n\nnom\nnom de la station\n\n\nreg_code\ncode de la région\n\n\nreg_nom\nnom de la region\n\n\ngouv_nom\nnom du gouvernorat\n\n\nlat\nLatitude\n\n\nlon\nLongitude\n\n\nalt\nAltitude (en mètres)\n\n\ntmin\nMoyenne de Tmin\n\n\ntmax\nMoyenne de Tmax\n\n\ntmoy\nMoyenne de Tmoy\n\n\nprec\nMoyenne de précipitations totales\n\n\nvent\nMoyenne de vent km/h\n\n\nrose\nMoyenne de point de rosée"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#choix-des-deux-variables-à-analyser",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#choix-des-deux-variables-à-analyser",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "1.2 Choix des deux variables à analyser",
+    "text": "1.2 Choix des deux variables à analyser\nOn suppose qu’on ne s’intéresse qu’aux variables latitude (lat) et précipitations (prec) que l’on va renommer espectivement X (variable explicative) et Y (variable à expliquer)\n\n\ndon&lt;-don[,c(\"code\",\"nom\",\"lat\",\"tmoy\")]\ncolnames(don)&lt;-c(\"code\",\"nom\",\"X\",\"Y\")\nkable(head(don))\n\n\n\n\n\ncode\nnom\nX\nY\n\n\n\n\nBJ\nBeja\n36.73333\n18.55692\n\n\nBZ\nBizerte\n37.24545\n18.73467\n\n\nGB\nGabes\n33.87692\n20.64563\n\n\nGF\nGafsa\n34.42202\n20.42736\n\n\nJE\nJendouba\n36.48333\n19.17381\n\n\nKR\nKairouan\n35.66667\n20.88537"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#on-est-malin",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#on-est-malin",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "1.3 On est malin …",
+    "text": "1.3 On est malin …\nPour pouvoir produire des graphiques en français ou en arabes, on stocke dans des variables le titre, la source et le nom des deux indicateurs.\n\n# Pour la version française\ntitre &lt;- \"Température et latitude en Tunisie\"\nnomX &lt;- \"Latitude\"\nnomY &lt;- \"Température moyenne\""
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#visualisation-avec-plotxy",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#visualisation-avec-plotxy",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.1 Visualisation avec plot(X,Y)",
+    "text": "2.1 Visualisation avec plot(X,Y)\nLa manière la plus simple d’analyser la relation entre X et Y est d’utiliser un simple plot\n\n\nplot(don$X,don$Y)"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#visualisation-avec-plotxy-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#visualisation-avec-plotxy-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.1 Visualisation avec plot(X,Y)",
+    "text": "2.1 Visualisation avec plot(X,Y)\nLa fonction plot() comporte de nombreux paramètres permettant d’améliorer le graphique et de l’habiller. Voici un exemple d’habillage\n\nplot(don$X,don$Y,\n     main = titre,   # titre\n     cex.main = 1,      # police du titre\n     cex.sub = 0.6,     # police du sous-titre\n     xlab = nomX,    # nom de l'axe X\n     xlim = c(32.7,37.5),   # intervalle de l'axe X\n     ylab = nomY,    # nom de l'axe Y\n    ylim = c(17,24),    # intervalle de l'axe Y\n     cex.axis = 0.8,    # police des gradations d'axes\n     cex.lab = 0.8,     # police des noms d'axes\n     cex = 0.6,         # taille des symboles\n     col = \"blue\")       # couleur des symboles"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#visualisation-avec-plotxy-2",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#visualisation-avec-plotxy-2",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.1 Visualisation avec plot(X,Y)",
+    "text": "2.1 Visualisation avec plot(X,Y)\nLa fonction plot() comporte de nombreux paramètres permettant d’améliorer le graphique et de l’habiller. Voici un exemple d’habillage"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#identification-des-points-avec-text",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#identification-des-points-avec-text",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.2 Identification des points avec text(…)",
+    "text": "2.2 Identification des points avec text(…)\nOn peut ajouter au graphique généré par plot(X,Y) une couche de labels avec text(X,Y,Code). On précise la position avec pos =, la taille de police avex cex = et la couleur avec col =.\n\nplot(don$X,don$Y,\n     main = titre,   # titre\n     cex.main = 1,      # police du titre\n     cex.sub = 0.6,     # police du sous-titre\n     xlab = nomX,    # nom de l'axe X\n     xlim = c(32.7,37.5),   # intervalle de l'axe X\n     ylab = nomY,    # nom de l'axe Y\n    ylim = c(17,24),    # intervalle de l'axe Y\n     cex.axis = 0.8,    # police des gradations d'axes\n     cex.lab = 0.8,     # police des noms d'axes\n     cex = 0.6,         # taille des symboles\n     col = \"blue\")       # couleur des symboles\ntext(x = don$X,\n     y = don$Y,\n     label = don$code,\n     cex = 0.7,\n     pos=3,\n     col = \"blue\")"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#identification-des-points-avec-text-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#identification-des-points-avec-text-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.2 Identification des points avec text(…)",
+    "text": "2.2 Identification des points avec text(…)"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#ajout-de-lignes-horizontales-ou-verticales-avec-abline",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#ajout-de-lignes-horizontales-ou-verticales-avec-abline",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.3 Ajout de lignes horizontales ou verticales avec abline(…)",
+    "text": "2.3 Ajout de lignes horizontales ou verticales avec abline(…)\nOn peut rajouter à un graphique des lignes horizontales ou verticales avec abline en précisant leur position avec h= ou v=, leur épaisseur avec lwd = , leur style avec lty= et leur couleur avec col=\n\nplot(don$X,don$Y,\n     main = titre,   # titre\n     cex.main = 1,      # police du titre\n     cex.sub = 0.6,     # police du sous-titre\n     xlab = nomX,    # nom de l'axe X\n     xlim = c(32.7,37.5),   # intervalle de l'axe X\n     ylab = nomY,    # nom de l'axe Y\n    ylim = c(17,24),    # intervalle de l'axe Y\n     cex.axis = 0.8,    # police des gradations d'axes\n     cex.lab = 0.8,     # police des noms d'axes\n     cex = 0.6,         # taille des symboles\n     col = \"blue\")       # couleur des symboles\n\n\n# Ajout d'une ligne horizontale  correspondant à la moyenne de Y\nabline(h=mean(don$Y),col=\"red\",lwd = 1, lty = 2)\n# Ajout d'une ligne verticlae  correspondant à la moyenne de X\nabline(v=mean(don$X),col=\"red\",lwd = 1, lty = 2)\n\ntext(x = don$X,\n     y = don$Y,\n     label = don$code,\n     cex = 0.7,\n     pos=3,\n     col = \"blue\")"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#ajout-de-lignes-horizontales-ou-verticales-avec-abline-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#ajout-de-lignes-horizontales-ou-verticales-avec-abline-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.3 Ajout de lignes horizontales ou verticales avec abline(…)",
+    "text": "2.3 Ajout de lignes horizontales ou verticales avec abline(…)\n\nLa fonction abline() peut servir aussi à tracer la droite de régression Y=aX+b produite par la fonction lm() sur laquelle nous reviendrons plus tard."
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#au-delà-de-r-base",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#au-delà-de-r-base",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.4 Au delà de R-Base …",
+    "text": "2.4 Au delà de R-Base …\nIl existe des packages spécialisés permettant de faire des graphiques plus sophistiqués. Mais on les apprendra ultérieuement. Juste un exemple :\n\n\nlibrary(car)\nscatterplot(don$X,don$Y)"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#relation-linéairemonotonecomplexe",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#relation-linéairemonotonecomplexe",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.1 relation linéaire/monotone/complexe",
+    "text": "3.1 relation linéaire/monotone/complexe\n\nil existe une relation linéaire entre deux variables quantitatives X et Y si l’on peut prédire leurs valeurs respectives par les fonctions Y = a1.X + b1 et X = a2.X = b2\nil existe une relation monotone entre deux variables quantitatives X et Y si l’on peut prédire les valeurs Y en fonction de celle de X far une fonction Y=f(X) qui est strictement croissante ou strictement décroissante.\nil existe une relation complexe entre deux variables quantitatives X et Y si l’on peut prédire les valeurs Y en fonction de celle de X par une fonction Y=f(X) qui comporte au moins un point minimum ou maximum de changement de pente (annulation de la dérivée première)"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#relation-linéairemonotonecomplexe-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#relation-linéairemonotonecomplexe-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.1 relation linéaire/monotone/complexe",
+    "text": "3.1 relation linéaire/monotone/complexe"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#relation-positivenégativenulle",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#relation-positivenégativenulle",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.2 relation positive/négative/nulle",
+    "text": "3.2 relation positive/négative/nulle\n\nUne relation linéaire ou monotone est positive si à un accroissement de X correspond un accroissement de Y\nUne relation linéaire ou monotone est négative si à un accroissement de X correspond une diminution de Y\nune relation est nulle si une variation de X n’entraine pas de variation de Y"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#relation-positivenégativenulle-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#relation-positivenégativenulle-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.2 relation positive/négative/nulle",
+    "text": "3.2 relation positive/négative/nulle"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#relation-fortefaiblenulle",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#relation-fortefaiblenulle",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.3 : relation forte/faible/nulle",
+    "text": "3.3 : relation forte/faible/nulle\n\nUne relation linéaire est forte si une valeur de X permet de prédire la valeur de Y avec une faible marge d’erreur.\nUne relation linéaire ou monotone est faible si une valeur de X permet de prédire la valeur de Y avec une forte marge d’erreur.\nune relation linéaire est nulle si une valeur de X ne permet aucunement de prédire la valeur de Y"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#relation-fortefaiblenulle-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#relation-fortefaiblenulle-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.3 : relation forte/faible/nulle",
+    "text": "3.3 : relation forte/faible/nulle"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#relation-significativenon-siginificative",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#relation-significativenon-siginificative",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.4 : relation significative/non siginificative",
+    "text": "3.4 : relation significative/non siginificative\n\nUne relation linéaire est significative si l’effectif permettant de la mettre en évidence est suffisamment grand pour qu’on puisse exclure qu’elle soit l’effet du hasard.\nUne relation linéaire ou monotone est non significative si l’effectif permettant de la mettre en évidence n’est pas suffisamment grand pour qu’on puisse exclure qu’elle soit l’effet du hasard.\nOn considère traditionnellement qu’une relation est significative s’il y a moins de 5% de chances qu’elle soit l’effet du hasard (p-value &lt; 0.05)."
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#relation-significativenon-siginificative-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#relation-significativenon-siginificative-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.4 : relation significative/non siginificative",
+    "text": "3.4 : relation significative/non siginificative"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#sens-de-la-relation",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#sens-de-la-relation",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.1 Sens de la relation",
+    "text": "4.1 Sens de la relation\n\nLa fonction cor() permet de mesurer le coefficient de corrélation de deux variable X et Y.\nElle permet de détecter les relations linéaires en choisissant le paramètre (par défaut) method = pearson\n\nElle permet de détecter les relations non linéaires en choisissant le paramètre method = spearman qui mesure l’existence d’une relation monotone entre les rangs de X et Y"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#sens-de-la-relation-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#sens-de-la-relation-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.1 Sens de la relation",
+    "text": "4.1 Sens de la relation\n\nLa syntaxe de la fonction cor() est très simple et permet de calculer trois types de corrélation. La méthode par défaut est pearson c’est-à-dire le coefficient de corrélation linéaire\n\n\ncor(don$X,don$Y)\n\n[1] -0.7966527\n\ncor(don$X,don$Y, method = \"spearman\")\n\n[1] -0.7779221"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#forme-de-la-relation",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#forme-de-la-relation",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.2 forme de la relation",
+    "text": "4.2 forme de la relation"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#forme-de-la-relation-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#forme-de-la-relation-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.2 forme de la relation",
+    "text": "4.2 forme de la relation"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#intensité-de-la-relation",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#intensité-de-la-relation",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.3 Intensité de la relation",
+    "text": "4.3 Intensité de la relation\nPour calculer l’intensité d’une relation, on calcule le carré du coefficient de corrélation appelé coefficient de détermination et noté r2 et souvent exprimé en %. Il permet de connaître le pouvoir explicatif du modèle de régression Y = aX+b\n\nr2 &lt;- 100*cor(don$X,don$Y)**2\nr2\n\n[1] 63.46554"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#intensité-de-la-relation-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#intensité-de-la-relation-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.3 Intensité de la relation",
+    "text": "4.3 Intensité de la relation"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#significativité-de-la-relation",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#significativité-de-la-relation",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.4. significativité de la relation",
+    "text": "4.4. significativité de la relation\n\nla fonction cor() permet de savoir si une relation est forte ou faible, positive ou négative, linéaire ou non linéaire. Mais cor() ne permet pas de savoir si une relation est significative ou pas.\nEn effet une relation peut être forte mais non significative si elle a été calculée sur un échantillon trop petit.\nil faut donc effectuer un test pour obtenir une probabilité de rejet de l’hypothèse H0 d’absence de relation entre X et Y.\np-value &gt; 0.10 : relation non significative\n0.10 &gt; p-value &gt; 0.05 : relation presque significative\np-value &lt; 0.05 : relation significative\np-value &lt; 0.01 : relation très significative"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#significativité-de-la-relation-1",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#significativité-de-la-relation-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.4 significativité de la relation",
+    "text": "3.4 significativité de la relation\n\nA gauche : une relation forte mais non significative\nA droite : une relation faible mais très significative"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#significativité-de-la-relation-2",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#significativité-de-la-relation-2",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.4. significativité de la relation",
+    "text": "4.4. significativité de la relation\n\nC’est la fonction cor.test() qui permet de tester la significativité d’une relation en fournissant un intervalle de confiance du coefficient de corrélation et une probabilité de rejet de H0 appelée p-value.\n\n\ncor.test(don$Y,don$X)\n\n\n    Pearson's product-moment correlation\n\ndata:  don$Y and don$X\nt = -5.7451, df = 19, p-value = 1.549e-05\nalternative hypothesis: true correlation is not equal to 0\n95 percent confidence interval:\n -0.9140080 -0.5562694\nsample estimates:\n       cor \n-0.7966527"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_diapos.html#conclusion",
+    "href": "STAT2C_biv_quanti_quanti_diapos.html#conclusion",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.5 Conclusion",
+    "text": "3.5 Conclusion\nAlors qu’en est-il pour la relation température moyenne / altitude ?\n\nCette relation est :\n\nnégative : \\(r_{X,Y} &lt; 0\\)\nlinéaire : \\(r_{X,Y} \\approx \\rho_{X,Y}\\)\nforte : \\(r^2 = 79\\%\\)\ntrès signifcative : \\(p_{value} &lt; 0.001\\)"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html",
+    "href": "STAT1_Univariee_cours.html",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "",
+    "text": "Nous allons importer un fichier de données portant sur les revenus de 17000 ménages tunisiens en 2021. Il est tiré de l’enquête consommation et revenu de l’INS que l’on peut télécharger librement en cliquant ici\n\n\nOn commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS() qui permet de lire les fichiers sauvegardés sans le format interne de R et on affiche les 6 premières lignes\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\")  \nhead(base)\n\n  id reg    mil   sex age     mat        ins      csp nbp   pvr  rev\n1  1  GT urbain homme  59   marie   primaire retraité   6 FALSE 5103\n2  2  GT urbain homme  52   marie   primaire  employé   5 FALSE 5486\n3  3  GT urbain femme  34 divorce secondaire  chomeur   2 FALSE 5962\n4  4  GT urbain homme  65   marie   primaire  inactif   2 FALSE 3699\n5  5  GT urbain homme  35   marie secondaire  ouvrier   4 FALSE 5058\n6  6  GT urbain homme  43   marie   primaire  ouvrier   5 FALSE 3741\n\n\n\n\n\nOn a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Les variables proposées sont les suivantes :\n\nid : identifiant du ménages de 1 à 17114\nreg : région de résidence (NE, NO, CE, CO, SE, SO + Grand Tunis)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : age du chef de ménage\nmat : situation matrimoniale (célbataire, marié, veuf, divorcé)\nins : instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio professionnelle du chef de ménage (simplifiée)\nnbp : nombre de personnes composant le ménage\npauv: situation de pauvreté selon les critères de l’INS (Oui/Non)\nrev : revenu moyen par personnes en DT / an\n\n\n\n\nOn suppose qu’on ne s’intéresse qu’à quelques variables\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\", \"age\",\"ins\",\"pvr\",\"rev\")]\nhead(don)\n\n  reg    mil   sex age        ins   pvr  rev\n1  GT urbain homme  59   primaire FALSE 5103\n2  GT urbain homme  52   primaire FALSE 5486\n3  GT urbain femme  34 secondaire FALSE 5962\n4  GT urbain homme  65   primaire FALSE 3699\n5  GT urbain homme  35 secondaire FALSE 5058\n6  GT urbain homme  43   primaire FALSE 3741\n\n\n\n\n\nOn effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex             age                 ins      \n GT:3944   urbain:10836   homme:13996   Min.   : 19.00   aucun     :3742  \n NE:2458   rural : 6278   femme: 3118   1st Qu.: 46.00   primaire  :6979  \n NO:2502                                Median : 56.00   secondaire:4647  \n CE:2862                                Mean   : 56.34   supérieur :1746  \n CO:2330                                3rd Qu.: 66.00                    \n SE:1845                                Max.   :109.00                    \n SO:1173                                                                  \n    pvr               rev        \n Mode :logical   Min.   :   185  \n FALSE:14665     1st Qu.:  3035  \n TRUE :2449      Median :  4429  \n                 Mean   :  5519  \n                 3rd Qu.:  6496  \n                 Max.   :526271"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#importation-des-données",
+    "href": "STAT1_Univariee_cours.html#importation-des-données",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "",
+    "text": "On commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS() qui permet de lire les fichiers sauvegardés sans le format interne de R et on affiche les 6 premières lignes\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\")  \nhead(base)\n\n  id reg    mil   sex age     mat        ins      csp nbp   pvr  rev\n1  1  GT urbain homme  59   marie   primaire retraité   6 FALSE 5103\n2  2  GT urbain homme  52   marie   primaire  employé   5 FALSE 5486\n3  3  GT urbain femme  34 divorce secondaire  chomeur   2 FALSE 5962\n4  4  GT urbain homme  65   marie   primaire  inactif   2 FALSE 3699\n5  5  GT urbain homme  35   marie secondaire  ouvrier   4 FALSE 5058\n6  6  GT urbain homme  43   marie   primaire  ouvrier   5 FALSE 3741"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#liste-des-variables",
+    "href": "STAT1_Univariee_cours.html#liste-des-variables",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "",
+    "text": "On a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Les variables proposées sont les suivantes :\n\nid : identifiant du ménages de 1 à 17114\nreg : région de résidence (NE, NO, CE, CO, SE, SO + Grand Tunis)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : age du chef de ménage\nmat : situation matrimoniale (célbataire, marié, veuf, divorcé)\nins : instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio professionnelle du chef de ménage (simplifiée)\nnbp : nombre de personnes composant le ménage\npauv: situation de pauvreté selon les critères de l’INS (Oui/Non)\nrev : revenu moyen par personnes en DT / an"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#selection-du-tableau-à-analyser",
+    "href": "STAT1_Univariee_cours.html#selection-du-tableau-à-analyser",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "",
+    "text": "On suppose qu’on ne s’intéresse qu’à quelques variables\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\", \"age\",\"ins\",\"pvr\",\"rev\")]\nhead(don)\n\n  reg    mil   sex age        ins   pvr  rev\n1  GT urbain homme  59   primaire FALSE 5103\n2  GT urbain homme  52   primaire FALSE 5486\n3  GT urbain femme  34 secondaire FALSE 5962\n4  GT urbain homme  65   primaire FALSE 3699\n5  GT urbain homme  35 secondaire FALSE 5058\n6  GT urbain homme  43   primaire FALSE 3741"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#résumé-rapide",
+    "href": "STAT1_Univariee_cours.html#résumé-rapide",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "",
+    "text": "On effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex             age                 ins      \n GT:3944   urbain:10836   homme:13996   Min.   : 19.00   aucun     :3742  \n NE:2458   rural : 6278   femme: 3118   1st Qu.: 46.00   primaire  :6979  \n NO:2502                                Median : 56.00   secondaire:4647  \n CE:2862                                Mean   : 56.34   supérieur :1746  \n CO:2330                                3rd Qu.: 66.00                    \n SE:1845                                Max.   :109.00                    \n SO:1173                                                                  \n    pvr               rev        \n Mode :logical   Min.   :   185  \n FALSE:14665     1st Qu.:  3035  \n TRUE :2449      Median :  4429  \n                 Mean   :  5519  \n                 3rd Qu.:  6496  \n                 Max.   :526271"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#choix-de-la-variables",
+    "href": "STAT1_Univariee_cours.html#choix-de-la-variables",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "Choix de la variables",
+    "text": "Choix de la variables\nNous allons prendre comme exemple la variable ins que l’on va extraire du tableau pour en faire un vecteur X qui est de type factor\n\nX &lt;-don$ins\nclass(X)\n\n[1] \"factor\""
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#tableau-de-dénombrement",
+    "href": "STAT1_Univariee_cours.html#tableau-de-dénombrement",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "2.1 tableau de dénombrement",
+    "text": "2.1 tableau de dénombrement\nPour dénomber une variable qualitative, on utilise l’instruction table() qui crée un objet particulier qui n’est ni un data.frame, ni une matrix.\n\ncréation et affichage du tableau\n\ntab&lt;-table(X)\ntab\n\nX\n     aucun   primaire secondaire  supérieur \n      3742       6979       4647       1746"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#tableau-de-dénombrement-1",
+    "href": "STAT1_Univariee_cours.html#tableau-de-dénombrement-1",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "2.1 tableau de dénombrement",
+    "text": "2.1 tableau de dénombrement\n\nAjout du total\nUn objet de type table peut être manipulé par des fonctions spéciales comme addmargins()\n\ntab2&lt;-addmargins(tab)\ntab2\n\nX\n     aucun   primaire secondaire  supérieur        Sum \n      3742       6979       4647       1746      17114 \n\n\n\n\nTransformation en fréquence\nOn peut également passer en fréquence avec la fonction prop.table()\n\ntab3&lt;-prop.table(tab)\ntab3\n\nX\n     aucun   primaire secondaire  supérieur \n 0.2186514  0.4077948  0.2715321  0.1020217 \n\n\n\n\nTransformation en pourcentage\nOn peut finalement afficher le résultat sous une forme élégante :\n\ntab4&lt;-100*addmargins(tab3)\ntab4\n\nX\n     aucun   primaire secondaire  supérieur        Sum \n  21.86514   40.77948   27.15321   10.20217  100.00000"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#visualiation",
+    "href": "STAT1_Univariee_cours.html#visualiation",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "2.3 Visualiation",
+    "text": "2.3 Visualiation\nLa fonction plot() s’applique à la plupart de objets R. Elle s’adapte au type d’objet et va chercher la fonction la plus adaptée au type de variable. Dans le cas d’une variable de type factor, la fonction plot() appelle en réalité la fonction barplot() après avoir effectué le dénombrement avec table()\n\nDiagramme en bâtons\n\n# Ecriture simple\nplot(X)\n\n\n\n# Ecriture équivalente\n# barplot(table(X))\n\n\n\nplot amélioré\n\nplot(X,col=c(\"orange\",\"yellow\",\n             \"lightyellow\",\"lightgreen\"), \n     main= \"Niveau d'instruction des chefs de ménages\",\n     xlab = \"niveau\", \n     ylab = \"Nombre de ménages\",\n     sub = \"Source : INS, 2021\")"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#valeurs-centrales-et-paramètres-de-dispersion",
+    "href": "STAT1_Univariee_cours.html#valeurs-centrales-et-paramètres-de-dispersion",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.1 Valeurs centrales et paramètres de dispersion",
+    "text": "3.1 Valeurs centrales et paramètres de dispersion\n\nfonctions élémentaires\nUne variable numérique peut faire l’objet d’un ensemble de résumés statistiques à l’aide de fonctions élémentaires\n\nmin() : minimum\nmax() : maximum\nmean() : moyenne\nsd() : écart-type\nsum() : somme\n\nOn va prendre l’exemple du revenu moyen par habitant\n\nX &lt;- don$rev\nmin(X)\n\n[1] 185\n\nmax(X)\n\n[1] 526271\n\nmean(X)\n\n[1] 5519.385\n\nsd(X)\n\n[1] 7036.663\n\n\n\n\nquantiles\nPour calculer les quantiles on peut utiliser la fonction quantile() en paramétrant la valeur de fréquence cumulée ascendante\n\nquantile(X,0) : minimum\nquantile(X,0.10) : D1 (premier décile)\nquantile(X,0.25) : Q1 (premier quartile)\nquantile(X,0.5) : Q2 (médiane)\nquantile(X,0.75) : Q3 (troisième quartile)\nquantile(X,0.90) : D9 (dernier décile)\nquantile(X,1) : maximum\n\n\n\nquantiles\n\nX&lt;-don$rev\nquantile(X,0.5)\n\n 50% \n4429 \n\nsel&lt;-c(0,0.25,0.5,0.75,1)\nquantile(X,sel)\n\n       0%       25%       50%       75%      100% \n   185.00   3035.00   4429.00   6495.75 526271.00 \n\nsel&lt;-c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)\nquantile(X,sel)\n\n      0%      10%      20%      30%      40%      50%      60%      70% \n   185.0   2143.6   2757.0   3304.0   3854.0   4429.0   5104.0   5941.0 \n     80%      90%     100% \n  7151.0   9480.4 526271.0"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#tableau-de-dénombrement-discrétisation",
+    "href": "STAT1_Univariee_cours.html#tableau-de-dénombrement-discrétisation",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.2 Tableau de dénombrement (discrétisation)",
+    "text": "3.2 Tableau de dénombrement (discrétisation)\nUne variable quantitative peut être discrétisée avec cut(). Elle devient alors un facteur qu’on peut dénomber avec table()\n\nXQ&lt;-cut(don$rev, c(0, 500, 1000, 2000, 5000, 10000, 20000, 50000, 1000000))\ntable(XQ)\n\nXQ\n      (0,500]   (500,1e+03] (1e+03,2e+03] (2e+03,5e+03] (5e+03,1e+04] \n            7            92          1269          8664          5586 \n(1e+04,2e+04] (2e+04,5e+04] (5e+04,1e+06] \n         1333           134            29"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#boîte-à-moustaches",
+    "href": "STAT1_Univariee_cours.html#boîte-à-moustaches",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.3 Boîte à moustaches",
+    "text": "3.3 Boîte à moustaches\nLa fonction boxplot() permet de visualiser une distribution sous forme de boîte à moustache où l’on repère facilement :\n\nla médiane\nles quartiles Q1 et Q3\nle minimum et le maximum\nles valeurs extrêmes\n\n\nBoxplot simple\n\nboxplot(X)\n\n\n\n\n\n\nBoxplot améliorée\n\nboxplot(X,horizontal = TRUE, \n        col = \"gray80\",\n        main = \"Revenu par habitant des ménages\",\n        xlab = \"en DT\",\n        outline = F \n        )"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#histogramme",
+    "href": "STAT1_Univariee_cours.html#histogramme",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.4 Histogramme",
+    "text": "3.4 Histogramme\nDans le cas d’une variable quantitative continue, la visualisation la plus logique est l’histogramme que l’on peut tracer avec la fonction hist(). Celle-ci comporte plusieurs paramètres que l’on peut visualiser en allant dans l’onglet Help et en tapant le nom de la fonction. On retiendra surtout ici\n\nbreaks : contrôle le choix des classes\nprobability : affiche la densité et non pas l’effectif des classes\n\n\nHistogramme simple\n\nX&lt;-don$rev\nhist(X)\n\n\n\n\n\n\nHistogramme amélioré\n\nX&lt;-don$rev\n\n# Choix des classes\nmybreaks&lt;-c(min(X),1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,\n                       11000, 12000, 13000, 14000, 15000,16000,\n            17000, 18000, 19000, 20000, max(X))\n\nhist(X,\n     breaks = mybreaks, \n     col=\"lightyellow\",\n     main = \"Revenu des ménages tunisiens en 2021\",\n     sub = \"Source : INS, 2021\",\n     xlab = \"en DT par personne et par an\",\n     ylab = \"Probabilité\",\n     xlim=c(0,20000))\n\n\n\n\n\n\nHistogramme superbe\n\nX&lt;-don$rev\n\n# Choix des classes\nmybreaks&lt;-c(min(X),1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,\n                       11000, 12000, 13000, 14000, 15000,16000,\n            17000, 18000, 19000, 20000, max(X))\n\nhist(X,\n     breaks = mybreaks, \n     col=\"lightyellow\",\n     main = \"Revenu des ménages tunisiens en 2021\",\n     sub = \"Source : INS, 2021\",\n     xlab = \"en DT par personne et par an\",\n     ylab = \"Probabilité\",\n     xlim=c(0,20000))\n\n# Ajout d'une courbe de Probabilité lissée\nlines(density(X,\n              bw = sd(X)/2),\n              col=\"red\", lwd=2)\n\n# Ajout de la moyenne et de la médiane\nabline(v=mean(X), col=\"blue\")\nabline(v=median(X), col=\"green\")"
+  },
+  {
+    "objectID": "STAT1_Univariee_cours.html#objectif",
+    "href": "STAT1_Univariee_cours.html#objectif",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "Objectif",
+    "text": "Objectif\nVous allez maintenant essayer de reprendre les programmes précédents en analysant successivement une variable qualitative et une variable quantitative."
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html",
+    "href": "STAT2C_biv_quanti_quanti_cours.html",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "Nous allons charger ici un fichier de données climatiques sur la Tunisie\n\n\n\n# Importe les données\nlibrary(readxl)\ndon&lt;-read_xlsx(path = \"TUN-CLIMAT/tun_climat.xlsx\",\n              sheet = \"data\")\nkable(don, caption = \"Tableau de données\")\n\n\nTableau de données\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ncode\nnom\nreg_code\nreg_nom\nlat\nlon\nalt\ntmin\ntmax\ntmoy\nprec\nvent\nrosee\n\n\n\n\nBJ\nBeja\nNO\nNord-ouest\n36.73333\n9.183333\n159.00\n11.45894\n24.62033\n18.55692\n590.000\n6.436291\n10.881502\n\n\nBZ\nBizerte\nNE\nNord-est\n37.24545\n9.791453\n6.09\n13.36735\n23.96475\n18.73467\n639.000\n13.080826\n13.507263\n\n\nGB\nGabes\nSE\nSud-est\n33.87692\n10.103333\n7.92\n15.62121\n25.44585\n20.64563\n192.000\n11.564158\n12.396331\n\n\nGF\nGafsa\nSO\nSud-ouest\n34.42202\n8.822503\n323.08\n13.73596\n26.88865\n20.42736\n163.000\n12.759514\n7.894512\n\n\nJE\nJendouba\nNO\nNord-ouest\n36.48333\n8.800000\n144.00\n12.03502\n25.75739\n19.17381\n458.000\n8.187385\n11.549468\n\n\nKR\nKairouan\nCO\nCentre-ouest\n35.66667\n10.100000\n68.00\n15.05704\n27.37991\n20.88537\n303.000\n5.826256\n10.894726\n\n\nKS\nKasserine\nCO\nCentre-ouest\n35.16667\n8.833333\n707.00\n11.47720\n24.13852\n18.46683\n340.000\n12.853035\n8.366253\n\n\nKB\nKebili\nSO\nSud-ouest\n33.70000\n8.966667\n46.00\n15.34825\n28.66706\n22.71979\n89.000\n14.061362\n10.373775\n\n\nKF\nLe Kef\nNO\nNord-ouest\n36.13333\n8.700000\n518.00\n10.30506\n23.19958\n17.24170\n528.000\n8.246948\n8.059934\n\n\nMH\nMahdia\nCE\nCentre-est\n35.50000\n11.066667\n12.00\n16.50674\n23.29379\n20.16491\n290.000\n10.854368\n14.624500\n\n\nME\nMedenine\nSE\nSud-est\n33.35000\n10.483333\n117.00\n16.17117\n27.56439\n22.57362\n159.000\n8.743863\n11.404804\n\n\nMS\nMonastir\nCE\nCentre-est\n35.66667\n10.750000\n2.00\n15.64783\n24.26410\n19.76152\n322.062\n13.888661\n13.587094\n\n\nNB\nNabeul\nNE\nNord-est\n36.46667\n10.700000\n78.00\n15.70167\n23.43309\n19.81197\n450.000\n12.190401\n14.033335\n\n\nSF\nSfax\nCE\nCentre-est\n34.71795\n10.690972\n25.90\n14.88812\n25.24082\n20.05744\n221.000\n11.408961\n12.427977\n\n\nSZ\nSidi Bou Zid\nCO\nCentre-ouest\n35.00000\n9.483333\n355.00\n13.03144\n26.20685\n20.25616\n280.000\n8.283933\n9.461638\n\n\nSL\nSiliana\nNO\nNord-ouest\n36.06667\n9.366667\n445.00\n11.36109\n24.50220\n19.02255\n389.000\n9.242761\n9.455365\n\n\nSS\nSousse\nCE\nCentre-est\n35.70000\n10.600000\n5.00\n15.70000\n24.40000\n19.90000\n310.000\n12.500000\n13.600000\n\n\nTA\nTataouine\nSE\nSud-est\n32.91667\n10.450000\n215.00\n15.90320\n27.20100\n21.41218\n110.000\n10.298155\n9.182343\n\n\nTO\nTozeur\nSO\nSud-ouest\n33.93972\n8.110556\n87.47\n16.83189\n28.64269\n22.63410\n97.000\n14.732460\n8.697420\n\n\nTU\nTunis\nNE\nNord-est\n36.85103\n10.227217\n6.70\n14.26899\n24.61744\n19.14238\n453.000\n13.405618\n12.626422\n\n\nZA\nZaghouan\nNE\nNord-est\n36.43333\n10.083333\n156.00\n12.43361\n25.06573\n18.57657\n501.000\n10.331711\n11.907365\n\n\n\n\n\n\n\n\nOn charge ensuite le fichier des métadonnées:\n\n# Importe les métadonnées\nmeta&lt;-read_xlsx(path = \"TUN-CLIMAT/tun_climat.xlsx\",\n              sheet = \"meta\")\nkable(meta, caption = \"Tableau de métadonnées\")\n\n\nTableau de métadonnées\n\n\nvariable\ndef\n\n\n\n\ncode\ncode de la station\n\n\nnom\nnom de la station\n\n\nreg_code\ncode de la région\n\n\nreg_nom\nnom de la region\n\n\ngouv_nom\nnom du gouvernorat\n\n\nlat\nLatitude\n\n\nlon\nLongitude\n\n\nalt\nAltitude (en mètres)\n\n\ntmin\nMoyenne de Tmin\n\n\ntmax\nMoyenne de Tmax\n\n\ntmoy\nMoyenne de Tmoy\n\n\nprec\nMoyenne de précipitations totales\n\n\nvent\nMoyenne de vent km/h\n\n\nrose\nMoyenne de point de rosée\n\n\n\n\n\n\n\n\nOn suppose qu’on ne s’intéresse qu’aux variables latitude (lat) et précipitations (prec) que l’on va renommer espectivement X (variable explicative) et Y (variable à expliquer)\n\ndon&lt;-don[,c(\"code\",\"nom\",\"lat\",\"tmoy\")]\ncolnames(don)&lt;-c(\"code\",\"nom\",\"X\",\"Y\")\nkable(head(don))\n\n\n\n\ncode\nnom\nX\nY\n\n\n\n\nBJ\nBeja\n36.73333\n18.55692\n\n\nBZ\nBizerte\n37.24545\n18.73467\n\n\nGB\nGabes\n33.87692\n20.64563\n\n\nGF\nGafsa\n34.42202\n20.42736\n\n\nJE\nJendouba\n36.48333\n19.17381\n\n\nKR\nKairouan\n35.66667\n20.88537\n\n\n\n\n\n\n\n\nPour pouvoir produire des graphiques en français ou en arabes, on stocke dans des variables le titre, la source et le nom des deux indicateurs.\n\n# Pour la version française\ntitre &lt;- \"Température et latitude en Tunisie\"\nnomX &lt;- \"Latitude\"\nnomY &lt;- \"Température moyenne\""
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#importation-des-données",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#importation-des-données",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "# Importe les données\nlibrary(readxl)\ndon&lt;-read_xlsx(path = \"TUN-CLIMAT/tun_climat.xlsx\",\n              sheet = \"data\")\nkable(don, caption = \"Tableau de données\")\n\n\nTableau de données\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ncode\nnom\nreg_code\nreg_nom\nlat\nlon\nalt\ntmin\ntmax\ntmoy\nprec\nvent\nrosee\n\n\n\n\nBJ\nBeja\nNO\nNord-ouest\n36.73333\n9.183333\n159.00\n11.45894\n24.62033\n18.55692\n590.000\n6.436291\n10.881502\n\n\nBZ\nBizerte\nNE\nNord-est\n37.24545\n9.791453\n6.09\n13.36735\n23.96475\n18.73467\n639.000\n13.080826\n13.507263\n\n\nGB\nGabes\nSE\nSud-est\n33.87692\n10.103333\n7.92\n15.62121\n25.44585\n20.64563\n192.000\n11.564158\n12.396331\n\n\nGF\nGafsa\nSO\nSud-ouest\n34.42202\n8.822503\n323.08\n13.73596\n26.88865\n20.42736\n163.000\n12.759514\n7.894512\n\n\nJE\nJendouba\nNO\nNord-ouest\n36.48333\n8.800000\n144.00\n12.03502\n25.75739\n19.17381\n458.000\n8.187385\n11.549468\n\n\nKR\nKairouan\nCO\nCentre-ouest\n35.66667\n10.100000\n68.00\n15.05704\n27.37991\n20.88537\n303.000\n5.826256\n10.894726\n\n\nKS\nKasserine\nCO\nCentre-ouest\n35.16667\n8.833333\n707.00\n11.47720\n24.13852\n18.46683\n340.000\n12.853035\n8.366253\n\n\nKB\nKebili\nSO\nSud-ouest\n33.70000\n8.966667\n46.00\n15.34825\n28.66706\n22.71979\n89.000\n14.061362\n10.373775\n\n\nKF\nLe Kef\nNO\nNord-ouest\n36.13333\n8.700000\n518.00\n10.30506\n23.19958\n17.24170\n528.000\n8.246948\n8.059934\n\n\nMH\nMahdia\nCE\nCentre-est\n35.50000\n11.066667\n12.00\n16.50674\n23.29379\n20.16491\n290.000\n10.854368\n14.624500\n\n\nME\nMedenine\nSE\nSud-est\n33.35000\n10.483333\n117.00\n16.17117\n27.56439\n22.57362\n159.000\n8.743863\n11.404804\n\n\nMS\nMonastir\nCE\nCentre-est\n35.66667\n10.750000\n2.00\n15.64783\n24.26410\n19.76152\n322.062\n13.888661\n13.587094\n\n\nNB\nNabeul\nNE\nNord-est\n36.46667\n10.700000\n78.00\n15.70167\n23.43309\n19.81197\n450.000\n12.190401\n14.033335\n\n\nSF\nSfax\nCE\nCentre-est\n34.71795\n10.690972\n25.90\n14.88812\n25.24082\n20.05744\n221.000\n11.408961\n12.427977\n\n\nSZ\nSidi Bou Zid\nCO\nCentre-ouest\n35.00000\n9.483333\n355.00\n13.03144\n26.20685\n20.25616\n280.000\n8.283933\n9.461638\n\n\nSL\nSiliana\nNO\nNord-ouest\n36.06667\n9.366667\n445.00\n11.36109\n24.50220\n19.02255\n389.000\n9.242761\n9.455365\n\n\nSS\nSousse\nCE\nCentre-est\n35.70000\n10.600000\n5.00\n15.70000\n24.40000\n19.90000\n310.000\n12.500000\n13.600000\n\n\nTA\nTataouine\nSE\nSud-est\n32.91667\n10.450000\n215.00\n15.90320\n27.20100\n21.41218\n110.000\n10.298155\n9.182343\n\n\nTO\nTozeur\nSO\nSud-ouest\n33.93972\n8.110556\n87.47\n16.83189\n28.64269\n22.63410\n97.000\n14.732460\n8.697420\n\n\nTU\nTunis\nNE\nNord-est\n36.85103\n10.227217\n6.70\n14.26899\n24.61744\n19.14238\n453.000\n13.405618\n12.626422\n\n\nZA\nZaghouan\nNE\nNord-est\n36.43333\n10.083333\n156.00\n12.43361\n25.06573\n18.57657\n501.000\n10.331711\n11.907365"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#liste-des-variables",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#liste-des-variables",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On charge ensuite le fichier des métadonnées:\n\n# Importe les métadonnées\nmeta&lt;-read_xlsx(path = \"TUN-CLIMAT/tun_climat.xlsx\",\n              sheet = \"meta\")\nkable(meta, caption = \"Tableau de métadonnées\")\n\n\nTableau de métadonnées\n\n\nvariable\ndef\n\n\n\n\ncode\ncode de la station\n\n\nnom\nnom de la station\n\n\nreg_code\ncode de la région\n\n\nreg_nom\nnom de la region\n\n\ngouv_nom\nnom du gouvernorat\n\n\nlat\nLatitude\n\n\nlon\nLongitude\n\n\nalt\nAltitude (en mètres)\n\n\ntmin\nMoyenne de Tmin\n\n\ntmax\nMoyenne de Tmax\n\n\ntmoy\nMoyenne de Tmoy\n\n\nprec\nMoyenne de précipitations totales\n\n\nvent\nMoyenne de vent km/h\n\n\nrose\nMoyenne de point de rosée"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#choix-des-deux-variables-à-analyser",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#choix-des-deux-variables-à-analyser",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On suppose qu’on ne s’intéresse qu’aux variables latitude (lat) et précipitations (prec) que l’on va renommer espectivement X (variable explicative) et Y (variable à expliquer)\n\ndon&lt;-don[,c(\"code\",\"nom\",\"lat\",\"tmoy\")]\ncolnames(don)&lt;-c(\"code\",\"nom\",\"X\",\"Y\")\nkable(head(don))\n\n\n\n\ncode\nnom\nX\nY\n\n\n\n\nBJ\nBeja\n36.73333\n18.55692\n\n\nBZ\nBizerte\n37.24545\n18.73467\n\n\nGB\nGabes\n33.87692\n20.64563\n\n\nGF\nGafsa\n34.42202\n20.42736\n\n\nJE\nJendouba\n36.48333\n19.17381\n\n\nKR\nKairouan\n35.66667\n20.88537"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#on-est-malin",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#on-est-malin",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "Pour pouvoir produire des graphiques en français ou en arabes, on stocke dans des variables le titre, la source et le nom des deux indicateurs.\n\n# Pour la version française\ntitre &lt;- \"Température et latitude en Tunisie\"\nnomX &lt;- \"Latitude\"\nnomY &lt;- \"Température moyenne\""
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#visualisation-avec-plotxy",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#visualisation-avec-plotxy",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.1 Visualisation avec plot(X,Y)",
+    "text": "2.1 Visualisation avec plot(X,Y)\nLa manière la plus simple d’analyser la relation entre X et Y est d’utiliser un simple plot\n\nplot(don$X,don$Y)"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#visualisation-avec-plotxy-1",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#visualisation-avec-plotxy-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.1 Visualisation avec plot(X,Y)",
+    "text": "2.1 Visualisation avec plot(X,Y)\nLa fonction plot() comporte de nombreux paramètres permettant d’améliorer le graphique et de l’habiller. Voici un exemple d’habillage\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\n\nplot(don$X,don$Y,\n     main = titre,   # titre\n     cex.main = 1,      # police du titre\n     cex.sub = 0.6,     # police du sous-titre\n     xlab = nomX,    # nom de l'axe X\n     xlim = c(32.7,37.5),   # intervalle de l'axe X\n     ylab = nomY,    # nom de l'axe Y\n    ylim = c(17,24),    # intervalle de l'axe Y\n     cex.axis = 0.8,    # police des gradations d'axes\n     cex.lab = 0.8,     # police des noms d'axes\n     cex = 0.6,         # taille des symboles\n     col = \"blue\")       # couleur des symboles"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#identification-des-points-avec-text",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#identification-des-points-avec-text",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.2 Identification des points avec text(…)",
+    "text": "2.2 Identification des points avec text(…)\nOn peut ajouter au graphique généré par plot(X,Y) une couche de labels avec text(X,Y,Code). On précise la position avec pos =, la taille de police avex cex = et la couleur avec col =.\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\n\nplot(don$X,don$Y,\n     main = titre,   # titre\n     cex.main = 1,      # police du titre\n     cex.sub = 0.6,     # police du sous-titre\n     xlab = nomX,    # nom de l'axe X\n     xlim = c(32.7,37.5),   # intervalle de l'axe X\n     ylab = nomY,    # nom de l'axe Y\n    ylim = c(17,24),    # intervalle de l'axe Y\n     cex.axis = 0.8,    # police des gradations d'axes\n     cex.lab = 0.8,     # police des noms d'axes\n     cex = 0.6,         # taille des symboles\n     col = \"blue\")       # couleur des symboles\ntext(x = don$X,\n     y = don$Y,\n     label = don$code,\n     cex = 0.7,\n     pos=3,\n     col = \"blue\")"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#ajout-de-lignes-horizontales-ou-verticales-avec-abline",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#ajout-de-lignes-horizontales-ou-verticales-avec-abline",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.3 Ajout de lignes horizontales ou verticales avec abline(…)",
+    "text": "2.3 Ajout de lignes horizontales ou verticales avec abline(…)\nOn peut rajouter à un graphique des lignes horizontales ou verticales avec abline en précisant leur position avec h= ou v=, leur épaisseur avec lwd = , leur style avec lty= et leur couleur avec col=\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\n\nplot(don$X,don$Y,\n     main = titre,   # titre\n     cex.main = 1,      # police du titre\n     cex.sub = 0.6,     # police du sous-titre\n     xlab = nomX,    # nom de l'axe X\n     xlim = c(32.7,37.5),   # intervalle de l'axe X\n     ylab = nomY,    # nom de l'axe Y\n    ylim = c(17,24),    # intervalle de l'axe Y\n     cex.axis = 0.8,    # police des gradations d'axes\n     cex.lab = 0.8,     # police des noms d'axes\n     cex = 0.6,         # taille des symboles\n     col = \"blue\")       # couleur des symboles\n\n\n# Ajout d'une ligne horizontale  correspondant à la moyenne de Y\nabline(h=mean(don$Y),col=\"red\",lwd = 1, lty = 2)\n# Ajout d'une ligne verticlae  correspondant à la moyenne de X\nabline(v=mean(don$X),col=\"red\",lwd = 1, lty = 2)\n\ntext(x = don$X,\n     y = don$Y,\n     label = don$code,\n     cex = 0.7,\n     pos=3,\n     col = \"blue\")\n\n\n\n\n\n\n\n\n\nLa fonction abline() peut servir aussi à tracer la droite de régression Y=aX+b produite par la fonction lm() sur laquelle nous reviendrons plus tard."
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#au-delà-de-r-base",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#au-delà-de-r-base",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.4 Au delà de R-Base …",
+    "text": "2.4 Au delà de R-Base …\nIl existe des packages spécialisés permettant de faire des graphiques plus sophistiqués. Mais on les apprendra ultérieuement. Juste un exemple :\n\nlibrary(car)\nscatterplot(don$X,don$Y)"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#relation-linéairemonotonecomplexe",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#relation-linéairemonotonecomplexe",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.1 relation linéaire/monotone/complexe",
+    "text": "3.1 relation linéaire/monotone/complexe\n\nil existe une relation linéaire entre deux variables quantitatives X et Y si l’on peut prédire leurs valeurs respectives par les fonctions Y = a1.X + b1 et X = a2.X = b2\nil existe une relation monotone entre deux variables quantitatives X et Y si l’on peut prédire les valeurs Y en fonction de celle de X far une fonction Y=f(X) qui est strictement croissante ou strictement décroissante.\nil existe une relation complexe entre deux variables quantitatives X et Y si l’on peut prédire les valeurs Y en fonction de celle de X par une fonction Y=f(X) qui comporte au moins un point minimum ou maximum de changement de pente (annulation de la dérivée première)"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#relation-linéairemonotonecomplexe-1",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#relation-linéairemonotonecomplexe-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.1 relation linéaire/monotone/complexe",
+    "text": "3.1 relation linéaire/monotone/complexe"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#relation-positivenégativenulle",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#relation-positivenégativenulle",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.2 relation positive/négative/nulle",
+    "text": "3.2 relation positive/négative/nulle\n\nUne relation linéaire ou monotone est positive si à un accroissement de X correspond un accroissement de Y\nUne relation linéaire ou monotone est négative si à un accroissement de X correspond une diminution de Y\nune relation est nulle si une variation de X n’entraine pas de variation de Y"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#relation-positivenégativenulle-1",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#relation-positivenégativenulle-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.2 relation positive/négative/nulle",
+    "text": "3.2 relation positive/négative/nulle"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#relation-fortefaiblenulle",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#relation-fortefaiblenulle",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.3 : relation forte/faible/nulle",
+    "text": "3.3 : relation forte/faible/nulle\n\nUne relation linéaire est forte si une valeur de X permet de prédire la valeur de Y avec une faible marge d’erreur.\nUne relation linéaire ou monotone est faible si une valeur de X permet de prédire la valeur de Y avec une forte marge d’erreur.\nune relation linéaire est nulle si une valeur de X ne permet aucunement de prédire la valeur de Y"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#relation-fortefaiblenulle-1",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#relation-fortefaiblenulle-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.3 : relation forte/faible/nulle",
+    "text": "3.3 : relation forte/faible/nulle"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#relation-significativenon-siginificative",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#relation-significativenon-siginificative",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.4 : relation significative/non siginificative",
+    "text": "3.4 : relation significative/non siginificative\n\nUne relation linéaire est significative si l’effectif permettant de la mettre en évidence est suffisamment grand pour qu’on puisse exclure qu’elle soit l’effet du hasard.\nUne relation linéaire ou monotone est non significative si l’effectif permettant de la mettre en évidence n’est pas suffisamment grand pour qu’on puisse exclure qu’elle soit l’effet du hasard.\nOn considère traditionnellement qu’une relation est significative s’il y a moins de 5% de chances qu’elle soit l’effet du hasard (p-value &lt; 0.05)."
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#relation-significativenon-siginificative-1",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#relation-significativenon-siginificative-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.4 : relation significative/non siginificative",
+    "text": "3.4 : relation significative/non siginificative"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#sens-de-la-relation",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#sens-de-la-relation",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.1 Sens de la relation",
+    "text": "4.1 Sens de la relation\n\nLa fonction cor() permet de mesurer le coefficient de corrélation de deux variable X et Y.\nElle permet de détecter les relations linéaires en choisissant le paramètre (par défaut) method = pearson\n\nElle permet de détecter les relations non linéaires en choisissant le paramètre method = spearman qui mesure l’existence d’une relation monotone entre les rangs de X et Y"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#sens-de-la-relation-1",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#sens-de-la-relation-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.1 Sens de la relation",
+    "text": "4.1 Sens de la relation\n\nLa syntaxe de la fonction cor() est très simple et permet de calculer trois types de corrélation. La méthode par défaut est pearson c’est-à-dire le coefficient de corrélation linéaire\n\n\ncor(don$X,don$Y)\n\n[1] -0.7966527\n\ncor(don$X,don$Y, method = \"spearman\")\n\n[1] -0.7779221"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#forme-de-la-relation",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#forme-de-la-relation",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.2 forme de la relation",
+    "text": "4.2 forme de la relation"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#forme-de-la-relation-1",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#forme-de-la-relation-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.2 forme de la relation",
+    "text": "4.2 forme de la relation"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#intensité-de-la-relation",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#intensité-de-la-relation",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.3 Intensité de la relation",
+    "text": "4.3 Intensité de la relation\nPour calculer l’intensité d’une relation, on calcule le carré du coefficient de corrélation appelé coefficient de détermination et noté r2 et souvent exprimé en %. Il permet de connaître le pouvoir explicatif du modèle de régression Y = aX+b\n\nr2 &lt;- 100*cor(don$X,don$Y)**2\nr2\n\n[1] 63.46554"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#intensité-de-la-relation-1",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#intensité-de-la-relation-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.3 Intensité de la relation",
+    "text": "4.3 Intensité de la relation"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#significativité-de-la-relation",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#significativité-de-la-relation",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.4. significativité de la relation",
+    "text": "4.4. significativité de la relation\n\nla fonction cor() permet de savoir si une relation est forte ou faible, positive ou négative, linéaire ou non linéaire. Mais cor() ne permet pas de savoir si une relation est significative ou pas.\nEn effet une relation peut être forte mais non significative si elle a été calculée sur un échantillon trop petit.\nil faut donc effectuer un test pour obtenir une probabilité de rejet de l’hypothèse H0 d’absence de relation entre X et Y.\np-value &gt; 0.10 : relation non significative\n0.10 &gt; p-value &gt; 0.05 : relation presque significative\np-value &lt; 0.05 : relation significative\np-value &lt; 0.01 : relation très significative"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#significativité-de-la-relation-1",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#significativité-de-la-relation-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.4 significativité de la relation",
+    "text": "3.4 significativité de la relation\n\nA gauche : une relation forte mais non significative\nA droite : une relation faible mais très significative"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#significativité-de-la-relation-2",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#significativité-de-la-relation-2",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "4.4. significativité de la relation",
+    "text": "4.4. significativité de la relation\n\nC’est la fonction cor.test() qui permet de tester la significativité d’une relation en fournissant un intervalle de confiance du coefficient de corrélation et une probabilité de rejet de H0 appelée p-value.\n\n\ncor.test(don$Y,don$X)\n\n\n    Pearson's product-moment correlation\n\ndata:  don$Y and don$X\nt = -5.7451, df = 19, p-value = 1.549e-05\nalternative hypothesis: true correlation is not equal to 0\n95 percent confidence interval:\n -0.9140080 -0.5562694\nsample estimates:\n       cor \n-0.7966527"
+  },
+  {
+    "objectID": "STAT2C_biv_quanti_quanti_cours.html#conclusion",
+    "href": "STAT2C_biv_quanti_quanti_cours.html#conclusion",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.5 Conclusion",
+    "text": "3.5 Conclusion\nAlors qu’en est-il pour la relation température moyenne / altitude ?\n\n\n\n\n\nCette relation est :\n\nnégative : \\(r_{X,Y} &lt; 0\\)\nlinéaire : \\(r_{X,Y} \\approx \\rho_{X,Y}\\)\nforte : \\(r^2 = 79\\%\\)\ntrès signifcative : \\(p_{value} &lt; 0.001\\)"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html",
+    "href": "MOD1_Analyse_de_variance_cours.html",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "",
+    "text": "library(sf, quietly= TRUE,warn.conflicts = F)\nlibrary(dplyr, quietly = TRUE,warn.conflicts = F)\nlibrary(knitr)\nlibrary(mapsf)\nlibrary(car,warn.conflicts = F,quietly=T)\nL’objectif de cet exercice est de fournir une introduction aux modèles d’analyse de variance simple ou multiples dans lesquels une variable Y quantitative est fonction d’une ou plusieurs variables qualitatives X1, X2, X3…"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#importation-des-données",
+    "href": "MOD1_Analyse_de_variance_cours.html#importation-des-données",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Importation des données",
+    "text": "Importation des données\nOn commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS() qui permet de lire les fichiers sauvegardés dans le format interne de R et on affiche les 6 premières lignes :\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\") \n\nhead(base)\n\n  id reg    mil   sex age     mat        ins      csp nbp   pvr  rev\n1  1  GT urbain homme  59   marie   primaire retraité   6 FALSE 5103\n2  2  GT urbain homme  52   marie   primaire  employé   5 FALSE 5486\n3  3  GT urbain femme  34 divorce secondaire  chomeur   2 FALSE 5962\n4  4  GT urbain homme  65   marie   primaire  inactif   2 FALSE 3699\n5  5  GT urbain homme  35   marie secondaire  ouvrier   4 FALSE 5058\n6  6  GT urbain homme  43   marie   primaire  ouvrier   5 FALSE 3741"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#liste-des-variables",
+    "href": "MOD1_Analyse_de_variance_cours.html#liste-des-variables",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Liste des variables",
+    "text": "Liste des variables\nOn a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Nous avons décidé de retirer les données incomplètes pour lesquels il manque des informations telles que le sexe, l’âge ou la profession du chef de ménage. Pour cette raison les résultats obtenus seront très légèrement différents de ceux présentés sur le site de l’INS.\nLes variables proposées sont les suivantes :\n\nid : identifiant du ménage de 1 à 17114\nreg : région de résidence (GT = Grand Tunis, NE = Nord-Est, …)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : âge du chef de ménage\nmat : situation matrimoniale du chef de ménage (célibataire, marié, veuf, divorcé)\nins : niveau d’instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio-professionnelle du chef de ménage (simplifiée par rapport au fichier de l’INS)\nnbp : nombre de personnes composant le ménage\npvr : situation de pauvreté selon les critères de l’INS, c’est-à-dire en tenant compte par exemple du coût de la vie dans la région de résidence (Oui/Non)\nrev : revenu annuel moyen divisé par le nombre de personnes du ménage (en DT / an)"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#selection-du-tableau-à-analyser",
+    "href": "MOD1_Analyse_de_variance_cours.html#selection-du-tableau-à-analyser",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Selection du tableau à analyser",
+    "text": "Selection du tableau à analyser\nOn suppose qu’on ne s’intéresse qu’à quelques variables\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\", \"ins\", \"age\",\"rev\")]\nhead(don)\n\n  reg    mil   sex        ins age  rev\n1  GT urbain homme   primaire  59 5103\n2  GT urbain homme   primaire  52 5486\n3  GT urbain femme secondaire  34 5962\n4  GT urbain homme   primaire  65 3699\n5  GT urbain homme secondaire  35 5058\n6  GT urbain homme   primaire  43 3741"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#résumé-rapide",
+    "href": "MOD1_Analyse_de_variance_cours.html#résumé-rapide",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Résumé rapide",
+    "text": "Résumé rapide\nOn effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex                ins            age        \n GT:3944   urbain:10836   homme:13996   aucun     :3742   Min.   : 19.00  \n NE:2458   rural : 6278   femme: 3118   primaire  :6979   1st Qu.: 46.00  \n NO:2502                                secondaire:4647   Median : 56.00  \n CE:2862                                supérieur :1746   Mean   : 56.34  \n CO:2330                                                  3rd Qu.: 66.00  \n SE:1845                                                  Max.   :109.00  \n SO:1173                                                                  \n      rev        \n Min.   :   185  \n 1st Qu.:  3035  \n Median :  4429  \n Mean   :  5519  \n 3rd Qu.:  6496  \n Max.   :526271  \n                 \n\n\n\n\n\n\n\n\nAbsence de pondération\n\n\n\n\n\nPour cette enquete l’INS a utilisé la méthode de tirage au sort par région, milieu, sexe et âge qui rend l’échantillon représentatif de la population tunisienne sans qu’il soit nécessaire d’introduire une procédure de redressement. Le fait que nous ayons retiré les quelques individus pour lesquels certaines valeurs étaient manquantes ne change pas fondamentalement les résultats."
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#paramètres-principaux",
+    "href": "MOD1_Analyse_de_variance_cours.html#paramètres-principaux",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Paramètres principaux",
+    "text": "Paramètres principaux\nUn résumé rapide est obtenu à l’aide de la fonction summary() que l’on complète par le calcul de l’écart-type et du coefficient de variation.\n\nres&lt;-summary(don$rev)\nect&lt;-sd(don$rev)\ncv &lt;- 100*sd(don$rev)/mean(don$rev)\nres&lt;-c(res,ect,cv)\nnames(res)&lt;-c(\"Minimum\", \"Q1\",\"Médiane\",\"Moyenne\",\"Q3\",\"Maximum\", \"Ecart-type\", \"CV (%)\")\nkable(res, digits=1, caption = \"Paramètres principaux des revenus en Tunisie\")\n\n\nParamètres principaux des revenus en Tunisie\n\n\n\nx\n\n\n\n\nMinimum\n185.0\n\n\nQ1\n3035.0\n\n\nMédiane\n4429.0\n\n\nMoyenne\n5519.4\n\n\nQ3\n6495.8\n\n\nMaximum\n526271.0\n\n\nEcart-type\n7036.7\n\n\nCV (%)\n127.5\n\n\n\n\n\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\n\nNous obtenons un revenu annuel moyen de 5519 DT ce qui est un peu plus que la valeur publiée sur le site de l’INS qui est de 5426 DT. La différence s’explique, comme nous l’avons expliqué précédemment, par le fait que nous avons retiré quelques individus ayant des valeurs manquantes.\nl’analyse des quantiles de la distribution indique que le revenu médian est de 4429 DT et que 50% des ménages ont des revenus compris entre Q1 = 3035 DT et Q3 = 6495 DT. Il existe toutefois des valeurs extrêmes puisque le minimum est de 185 DT et le maximum de 526271 DT.\nLa dispersion de la distribution des revenus est donc très forte comme en témoigne l’écart type de 7036 DT et surtout le coefficient de variation qui montre que l’écart-type est égal à 127.5% de la moyenne."
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#forme-de-la-distribution",
+    "href": "MOD1_Analyse_de_variance_cours.html#forme-de-la-distribution",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Forme de la distribution",
+    "text": "Forme de la distribution\nOn devine à l’aide des résultats précédents que la distribution comporte des valeurs exceptionnelles et doit être fortement dissymétriques à gauche.\n\npar(mfrow=c(2,1))\n\nhist(don$rev, \n     main=\"Histogramme\",\n     col=\"lightyellow\",\n     xlab=\"Revenu par habitant·e (log)\")\n\nboxplot(don$rev, \n        main = \"Boîte à moustache\",\n        col=\"lightyellow\",\n        xlab =\"Revenu par habitant·e (log)\", \n        horizontal=T)\n\n\n\n\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\nLa distribution est effectivemet fortement dissymétrique à gauche en raison de la présence de valeurs exceptionnelles correspondant aux individus les plus riches. L’histogramme est de ce fait totalement illisible."
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#transformation-logarithmique",
+    "href": "MOD1_Analyse_de_variance_cours.html#transformation-logarithmique",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Transformation logarithmique",
+    "text": "Transformation logarithmique\nOn décide de transformer la variable en son logarithme ce qui est une pratique courante lorsqu’on analyse les revenus des ménages. On espère ainsi que la nouvelle distribution deviendra plus symétrique voire gaussienne ce qui signifierait qu’elle est log-normale.\n\ndon$logrev&lt;-log(don$rev)\n\npar(mfrow=c(2,1))\nhist(don$logrev, \n     main=\"Histogramme\",\n     col=\"lightyellow\",\n     xlab=\"Revenu par habitant·e (log)\")\n\nboxplot(don$logrev, \n        main = \"Boîte à moustache\",\n        col=\"lightyellow\",\n        xlab =\"Revenu par habitant·e (log)\", \n        horizontal=T)\n\n\n\n\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\nLa distribution comporte encore des valeurs exceptionnelles à droite comme à gauche mais elle est désormais symétrique. Elle n’est donc pas véritablement log-normale car elle présente une sur-concentration des valeurs au centre. Nous n’allons cependant pas la modifier davantage et utiliser désormais le logarithme du revenu dans la suite des analyses."
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#modèle-1-le-revenu-moyen-annuel-log-est-il-différent-en-milieu-urbain-et-en-milieu-rural",
+    "href": "MOD1_Analyse_de_variance_cours.html#modèle-1-le-revenu-moyen-annuel-log-est-il-différent-en-milieu-urbain-et-en-milieu-rural",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Modèle 1 : Le revenu moyen annuel (log) est-il différent en milieu urbain et en milieu rural ?",
+    "text": "Modèle 1 : Le revenu moyen annuel (log) est-il différent en milieu urbain et en milieu rural ?\nDans le cas d’une variable qualitative à deux modalités, nous pourrions utiliser un test d’égalité des moyennes comme cela a été vu dans le premier cours de statistique bivariée. Mais nous préférons utiliser ici l’analyse de variance afin de pouvoir ensuite appliquer la même méthode avec les autres variables qualitatives ayant plus de deux modalités.\n\nParamètres principaux\nOn commence par calculer les paramètres principaux des variables logrev (Y) en fonction de la variable explicative (X).\n\nY &lt;- don$logrev\nX &lt;- don$mil\n\n# création de 2 objets avec les libellés, pour les mobiliser plus facilement\nnameY &lt;- \"log. du revenu moyen (en DT/hab.)\"\nnameX &lt;- \"Milieu (Urbain/Rural)\"\n\n# calcul de la moyenne et de l'écart-type de Y selon les 2 modalités de X \nmoy&lt;-tapply(Y,X,mean)\nect&lt;- tapply(Y,X,sd)\ncv &lt;- 100*ect/moy\ntabres&lt;-rbind(moy,ect,cv)\nkable(tabres, caption = \"Paramètres princiapux du revenu moyen annuel \")\n\n\nParamètres princiapux du revenu moyen annuel\n\n\n\nurbain\nrural\n\n\n\n\nmoy\n8.5667253\n8.1360017\n\n\nect\n0.5679606\n0.5558948\n\n\ncv\n6.6298443\n6.8325299\n\n\n\n\n\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\nLes deux moyennes sont visiblement différentes et les revenus (en log) plus élevés en milieu urbain (8.57) qu’en milieu rural (8.13). Mais chaque milieu présente un fort écart-type (0.57 et 0.56) de sorte qu’il est difficile d’affirmer avec certitude que la différence entre les deux moyennes est significative si on ne fait pas un test statistique.\n\n\n\n\n\nVisualisation graphique\nPour mieux apprécier la différence entre les deux distributions on réalise une boxplot permettant de comparer non seulement les moyennes mais aussi les quartiles et ainsi de mieux apprécier visuellement la différence entre les deux distributions.\n\nboxplot(Y~X,\n    col=\"lightyellow\",\n     cex.axis=0.6, \n     xlab=nameX, \n     ylab= nameY,\n    horizontal=T)\n\n\n\n\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\nIl y a effectivement un net décalage entre le centre des deux distributions où se trouvent la médiane et les quartiles Q1 et Q3.\n\n\n\n\n\nModélisation linéaire\nOn réalise le modèle d’analyse de variance en utilisant le modèle linéaire général, c’est-à-dire la fonction lm() qu’on a utilisé précédemment pour mettre en relation deux variables quantitatives à l’aide de modèles de régression. Puis on résume les parts de variance intra-groupe et inter-groupe à l’aide de la fonction anova().\n\nmod&lt;-lm(Y~X)\nsummary(mod)\n\n\nCall:\nlm(formula = Y ~ X)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-2.9156 -0.3659 -0.0118  0.3454  5.0376 \n\nCoefficients:\n             Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  8.566725   0.005414 1582.36   &lt;2e-16 ***\nXrural      -0.430724   0.008939  -48.19   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.5636 on 17112 degrees of freedom\nMultiple R-squared:  0.1195,    Adjusted R-squared:  0.1194 \nF-statistic:  2322 on 1 and 17112 DF,  p-value: &lt; 2.2e-16\n\nanova(mod)\n\nAnalysis of Variance Table\n\nResponse: Y\n             Df Sum Sq Mean Sq F value    Pr(&gt;F)    \nX             1  737.5  737.46  2321.9 &lt; 2.2e-16 ***\nResiduals 17112 5434.9    0.32                      \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n\n\n\nInterprétation des résultats\nComme nous avons utilisé le logarithme du revenu, il faut utiliser une transformation exponentielle pour analyser correctement les coefficients. En effet on a :\n\n\\(log(rev) = a + b\\times mil\\)\n\\(rev = exp(a + b\\times mil)\\)\n\\(rev = exp(a) \\times exp(b)^{mil}\\)\n\n\nexp(mod$coefficients)\n\n (Intercept)       Xrural \n5253.8967919    0.6500385 \n\n\nDans cet exemple, les coefficients nous indiquent donc que le revenu moyen en milieu urbain est de 5254 DT/hab. (« (Intercept) »), tandis qu’il n’est que de en milieu rural. Le coefficient du modèle indique que le revenu ruar est égal à 65% de la valeur observée en milieu rural.\n\n\n\n\n\n\nMoyenne arithmétique et moyenne géométrique\n\n\n\n\n\nVous avez sans doute remarqué que les valeurs moyennes de revenu en milieu urbain et rural que nous obtenons ici ne correspondant pas à celles fournies par l’INS. La différence s’explique par le fait que nous avons travaillé sur le logarithme des revenus et non pas sur les revenus. En procédant ainsi nous avons en fait comparé la différence entre les moyennes géométriques des individus situés en milieu urbain et rural et non pas la différence entre les moyennes arithmétiques.\n\\(Moy_{arithmétique} = \\sum_{i=1}^{n}{X_i} / n\\) \\(Moy_{geométrique} = exp(\\sum_{i=1}^{n}log({X_i}) / n)\\)"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#modèle-2-le-revenu-moyen-annuel-est-il-lié-au-genre-du-chef-de-ménage",
+    "href": "MOD1_Analyse_de_variance_cours.html#modèle-2-le-revenu-moyen-annuel-est-il-lié-au-genre-du-chef-de-ménage",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Modèle 2 : Le revenu moyen annuel est-il lié au genre du chef de ménage ?",
+    "text": "Modèle 2 : Le revenu moyen annuel est-il lié au genre du chef de ménage ?\nOn rassemble nos quatre petits blocs de programme en un seul et on change juste le choix de la variable explicative. Désormais c’est à vous de faire les commentaires !\n\n# Choix des variables\nY&lt;-don$logrev \nX&lt;- don$sex\nnameY &lt;-\"log. du Revenu (en DT/hab.)\"\nnameX &lt;- \"Genre du chef de ménage\"\n\n# Paramètres principaux\ntapply(Y,X,mean)\n\n   homme    femme \n8.378079 8.546267 \n\ntapply(Y,X,sd)\n\n    homme     femme \n0.5958316 0.6025676 \n\n# Visualisation\nboxplot(Y~X,\n    col=\"lightyellow\",\n     cex.axis=0.6, \n     xlab=nameX, \n     ylab= nameY,\n    horizontal=T)\n\n\n\n# Modélisation\nmod&lt;-lm(Y~X)\nsummary(mod)\n\n\nCall:\nlm(formula = Y ~ X)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-3.1577 -0.3861 -0.0128  0.3657  4.7955 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 8.378079   0.005047 1660.07   &lt;2e-16 ***\nXfemme      0.168188   0.011824   14.22   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.5971 on 17112 degrees of freedom\nMultiple R-squared:  0.01169,   Adjusted R-squared:  0.01163 \nF-statistic: 202.3 on 1 and 17112 DF,  p-value: &lt; 2.2e-16\n\nanova(mod)\n\nAnalysis of Variance Table\n\nResponse: Y\n             Df Sum Sq Mean Sq F value    Pr(&gt;F)    \nX             1   72.1  72.131  202.34 &lt; 2.2e-16 ***\nResiduals 17112 6100.2   0.356                      \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n# Paramètres\nexp(mod$coefficients)\n\n(Intercept)      Xfemme \n4350.643239    1.183159 \n\n\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\nQue pouvez-vous dire des résultats ?"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#modèle-3-le-revenu-des-habitantes-est-il-lié-au-niveau-dinstruction-du-chef-de-ménage",
+    "href": "MOD1_Analyse_de_variance_cours.html#modèle-3-le-revenu-des-habitantes-est-il-lié-au-niveau-dinstruction-du-chef-de-ménage",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Modèle 3 : Le revenu des habitant·es est-il lié au niveau d’instruction du chef de ménage ?",
+    "text": "Modèle 3 : Le revenu des habitant·es est-il lié au niveau d’instruction du chef de ménage ?\nMême programme mais avec une variable qualitative ayant quatre niveaux.\n\n# Choix des variables\nY&lt;-don$logrev\nX&lt;- don$ins\nnameY &lt;-\"log. du Revenu (en DT/hab.)\"\nnameX &lt;- \"Instruction du chef de ménage\"\n\n# Paramètres principaux\ntapply(Y,X,mean)\n\n     aucun   primaire secondaire  supérieur \n  8.288205   8.295452   8.501042   8.874047 \n\ntapply(Y,X,sd)\n\n     aucun   primaire secondaire  supérieur \n 0.5629074  0.5562095  0.5908929  0.6076974 \n\n# Visualisation\nboxplot(Y~X,\n    col=\"lightyellow\",\n     cex.axis=0.6, \n     xlab=nameX, \n     ylab= nameY,\n    horizontal=T)\n\n\n\n# Modélisation\nmod&lt;-lm(Y~X)\nsummary(mod)\n\n\nCall:\nlm(formula = Y ~ X)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-3.0751 -0.3714 -0.0042  0.3619  4.8854 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 8.288205   0.009361 885.374   &lt;2e-16 ***\nXprimaire   0.007247   0.011603   0.625    0.532    \nXsecondaire 0.212836   0.012578  16.922   &lt;2e-16 ***\nXsupérieur  0.585841   0.016597  35.299   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.5726 on 17110 degrees of freedom\nMultiple R-squared:  0.09098,   Adjusted R-squared:  0.09082 \nF-statistic: 570.8 on 3 and 17110 DF,  p-value: &lt; 2.2e-16\n\nanova(mod)\n\nAnalysis of Variance Table\n\nResponse: Y\n             Df Sum Sq Mean Sq F value    Pr(&gt;F)    \nX             3  561.6 187.184  570.82 &lt; 2.2e-16 ***\nResiduals 17110 5610.8   0.328                      \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n# Paramètres\nexp(mod$coefficients)\n\n(Intercept)   Xprimaire Xsecondaire  Xsupérieur \n3976.691268    1.007273    1.237182    1.796502 \n\n\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\nQue pouvez-vous dire des résultats ?"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#modèle-4-le-revenu-des-habitantes-est-il-lié-à-la-région-où-ils-se-trouvent",
+    "href": "MOD1_Analyse_de_variance_cours.html#modèle-4-le-revenu-des-habitantes-est-il-lié-à-la-région-où-ils-se-trouvent",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Modèle 4 : Le revenu des habitant·es est-il lié à la région où ils se trouvent ?",
+    "text": "Modèle 4 : Le revenu des habitant·es est-il lié à la région où ils se trouvent ?\nMême programme mais avec une variable qualitative ayant cinq niveaux.\n\n# Choix des variables\nY&lt;-don$logrev\nX&lt;- don$reg\nnameY &lt;-\"log. du Revenu (en DT/hab.)\"\nnameX &lt;- \"Région\"\n\n# Paramètres principaux\ntapply(Y,X,mean)\n\n      GT       NE       NO       CE       CO       SE       SO \n8.739277 8.340811 8.231761 8.516970 8.062688 8.312937 8.390937 \n\ntapply(Y,X,sd)\n\n       GT        NE        NO        CE        CO        SE        SO \n0.5414742 0.5446345 0.5585463 0.5891304 0.5630847 0.5684727 0.5301464 \n\n# Visualisation\nboxplot(Y~X,\n    col=\"lightyellow\",\n     cex.axis=0.6, \n     xlab=nameX, \n     ylab= nameY,\n    horizontal=T)\n\n\n\n# Modélisation\nmod&lt;-lm(Y~X)\nsummary(mod)\n\n\nCall:\nlm(formula = Y ~ X)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-3.0926 -0.3644 -0.0166  0.3462  5.1109 \n\nCoefficients:\n             Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  8.739277   0.008881  984.01   &lt;2e-16 ***\nXNE         -0.398466   0.014333  -27.80   &lt;2e-16 ***\nXNO         -0.507516   0.014255  -35.60   &lt;2e-16 ***\nXCE         -0.222307   0.013696  -16.23   &lt;2e-16 ***\nXCO         -0.676588   0.014574  -46.42   &lt;2e-16 ***\nXSE         -0.426340   0.015732  -27.10   &lt;2e-16 ***\nXSO         -0.348340   0.018550  -18.78   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.5578 on 17107 degrees of freedom\nMultiple R-squared:  0.1378,    Adjusted R-squared:  0.1375 \nF-statistic: 455.6 on 6 and 17107 DF,  p-value: &lt; 2.2e-16\n\nanova(mod)\n\nAnalysis of Variance Table\n\nResponse: Y\n             Df Sum Sq Mean Sq F value    Pr(&gt;F)    \nX             6  850.5 141.743  455.63 &lt; 2.2e-16 ***\nResiduals 17107 5321.9   0.311                      \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n# Paramètres\nexp(mod$coefficients)\n\n (Intercept)          XNE          XNO          XCE          XCO          XSE \n6243.3778591    0.6713493    0.6019892    0.8006695    0.5083484    0.6528945 \n         XSO \n   0.7058590 \n\n\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\nQue pouvez-vous dire des résultats ?"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#modèle-5-le-revenu-des-habitantes-est-il-lié-à-lâge-du-chef-de-ménage",
+    "href": "MOD1_Analyse_de_variance_cours.html#modèle-5-le-revenu-des-habitantes-est-il-lié-à-lâge-du-chef-de-ménage",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Modèle 5 : Le revenu des habitant·es est-il lié à l’âge du chef de ménage ?",
+    "text": "Modèle 5 : Le revenu des habitant·es est-il lié à l’âge du chef de ménage ?\nInitialement la variable âge est quantitative. On pourrait envisager de construire une régression mais rien de prouve que le revenu augmente avec l’âge.\n\nplot(don$age,don$logrev, pch=20, cex=0.2)\n\n\n\n\nOn va donc transformer la variable age en classes qui doivent être bien réfléchies car elles vont conditionner les résultats. On peut utiliser les quantiles ou bien choisir ses propres classes en fonction de la connaissance que l’on a du phénomène. Par exemple ici on va retenir , 4 classes échelonnées en intervalles de 15 ans\n\nclasses&lt;-c(min(don$age),35,50,65, max(don$age))\ndon$age4 &lt;- cut(don$age,classes)\ntable(don$age4)\n\n\n (19,35]  (35,50]  (50,65] (65,109] \n    1075     5042     6478     4517 \n\n\nOn peut alors appliquer le même programme que précédemment :\n\n# Choix des variables\nY&lt;-don$logrev\nX&lt;- don$age4\nnameY &lt;-\"log. du Revenu (en DT/hab.)\"\nnameX &lt;- \"Age du chef de ménage\"\n\n# Paramètres principaux\ntapply(Y,X,mean)\n\n (19,35]  (35,50]  (50,65] (65,109] \n8.399881 8.216320 8.455677 8.558383 \n\ntapply(Y,X,sd)\n\n  (19,35]   (35,50]   (50,65]  (65,109] \n0.6684426 0.5873870 0.5647931 0.5923722 \n\n# Visualisation\nboxplot(Y~X,\n    col=\"lightyellow\",\n     cex.axis=0.6, \n     xlab=nameX, \n     ylab= nameY,\n    horizontal=T)\n\n\n\n# Modélisation\nmod&lt;-lm(Y~X)\nsummary(mod)\n\n\nCall:\nlm(formula = Y ~ X)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-3.0004 -0.3745 -0.0130  0.3539  4.6152 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  8.39988    0.01787 470.176  &lt; 2e-16 ***\nX(35,50]    -0.18356    0.01968  -9.328  &lt; 2e-16 ***\nX(50,65]     0.05580    0.01929   2.892  0.00383 ** \nX(65,109]    0.15850    0.01988   7.974 1.64e-15 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.5858 on 17108 degrees of freedom\n  (2 observations deleted due to missingness)\nMultiple R-squared:  0.04896,   Adjusted R-squared:  0.04879 \nF-statistic: 293.6 on 3 and 17108 DF,  p-value: &lt; 2.2e-16\n\nanova(mod)\n\nAnalysis of Variance Table\n\nResponse: Y\n             Df Sum Sq Mean Sq F value    Pr(&gt;F)    \nX             3  302.2 100.729  293.58 &lt; 2.2e-16 ***\nResiduals 17108 5869.9   0.343                      \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n# Paramètres\nexp(mod$coefficients)\n\n (Intercept)     X(35,50]     X(50,65]    X(65,109] \n4446.5360045    0.8323016    1.0573829    1.1717547 \n\n\n\n\n\n\n\n\nCommentaire\n\n\n\n\n\nQue pouvez-vous dire des résultats ?"
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#modèle-sans-interaction",
+    "href": "MOD1_Analyse_de_variance_cours.html#modèle-sans-interaction",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Modèle sans interaction",
+    "text": "Modèle sans interaction\nSi on suppose que toutes les variables explicatives sont indépendantes, on peut construire un modèle décrivant la prévision du revenu en fonction de l’effet des modalités de chacune des variables.\n\nmod&lt;-lm(formula = logrev~sex+age4+ins+mil+reg, data=don)\nsummary(mod)\n\n\nCall:\nlm(formula = logrev ~ sex + age4 + ins + mil + reg, data = don)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-2.8541 -0.3160 -0.0053  0.2974  5.1697 \n\nCoefficients:\n               Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)    8.311428   0.021026 395.284  &lt; 2e-16 ***\nsexfemme       0.204795   0.010614  19.294  &lt; 2e-16 ***\nage4(35,50]   -0.073096   0.016830  -4.343 1.41e-05 ***\nage4(50,65]    0.201689   0.016787  12.015  &lt; 2e-16 ***\nage4(65,109]   0.354050   0.017738  19.960  &lt; 2e-16 ***\ninsprimaire    0.128949   0.011287  11.425  &lt; 2e-16 ***\ninssecondaire  0.330686   0.012744  25.948  &lt; 2e-16 ***\ninssupérieur   0.647722   0.016273  39.802  &lt; 2e-16 ***\nmilrural      -0.211446   0.008892 -23.780  &lt; 2e-16 ***\nregNE         -0.278030   0.013094 -21.234  &lt; 2e-16 ***\nregNO         -0.296649   0.013478 -22.010  &lt; 2e-16 ***\nregCE         -0.121768   0.012377  -9.838  &lt; 2e-16 ***\nregCO         -0.450201   0.013859 -32.484  &lt; 2e-16 ***\nregSE         -0.322928   0.014129 -22.856  &lt; 2e-16 ***\nregSO         -0.281712   0.016577 -16.994  &lt; 2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.4967 on 17097 degrees of freedom\n  (2 observations deleted due to missingness)\nMultiple R-squared:  0.3166,    Adjusted R-squared:  0.316 \nF-statistic: 565.7 on 14 and 17097 DF,  p-value: &lt; 2.2e-16\n\nAnova(mod,type = \"III\")\n\nAnova Table (Type III tests)\n\nResponse: logrev\n            Sum Sq    Df   F value    Pr(&gt;F)    \n(Intercept)  38551     1 156249.64 &lt; 2.2e-16 ***\nsex             92     1    372.27 &lt; 2.2e-16 ***\nage4           403     3    544.54 &lt; 2.2e-16 ***\nins            474     3    640.78 &lt; 2.2e-16 ***\nmil            140     1    565.51 &lt; 2.2e-16 ***\nreg            342     6    230.91 &lt; 2.2e-16 ***\nResiduals     4218 17097                        \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n\nComme on peut le voir, toutes les variables ont des effets significatifs toutes choses égales quant à celui des autres. Mais Le fait de procéder à une estimation simultanée entraîne des modifications des coefficients par rapport à ceux que l’on avait obtenu à l’aide des modèles simples. Ce modèle final résume 31.6% de la variance du logarithme des revenus ((« R-squared »), ce qui est un bon résultat. Mais il demeure évidemment plus de deux-tiers de variance résiduelle imputable à des facteurs non pris en compte."
+  },
+  {
+    "objectID": "MOD1_Analyse_de_variance_cours.html#interprétation-des-résultats-1",
+    "href": "MOD1_Analyse_de_variance_cours.html#interprétation-des-résultats-1",
+    "title": "ANALYSE DE VARIANCE",
+    "section": "Interprétation des résultats",
+    "text": "Interprétation des résultats\nNous construisons un tableau final dans lequel on a indiqué pour chaque modalité le coefficient correspondant et sa transformation exponentielle.\n\nx &lt;- mod$coefficients\ntabres &lt;- data.frame(parametre=x, exp_parametre=exp(x))\nkable(tabres, digits=3)\n\n\n\n\n\nparametre\nexp_parametre\n\n\n\n\n(Intercept)\n8.311\n4070.120\n\n\nsexfemme\n0.205\n1.227\n\n\nage4(35,50]\n-0.073\n0.930\n\n\nage4(50,65]\n0.202\n1.223\n\n\nage4(65,109]\n0.354\n1.425\n\n\ninsprimaire\n0.129\n1.138\n\n\ninssecondaire\n0.331\n1.392\n\n\ninssupérieur\n0.648\n1.911\n\n\nmilrural\n-0.211\n0.809\n\n\nregNE\n-0.278\n0.757\n\n\nregNO\n-0.297\n0.743\n\n\nregCE\n-0.122\n0.885\n\n\nregCO\n-0.450\n0.638\n\n\nregSE\n-0.323\n0.724\n\n\nregSO\n-0.282\n0.754\n\n\n\n\n\n\nla ligne « (Intercept) » correspond à la situation de référence par laquelle on va calculer l’effet des différentes modalités. Il s’agit ici d’un homme (*sex*), de 19-34 ans (*age*), sans instruction (*ins*) et résidant en milieu urbain (*mil*) dans le Grand Tunis (*reg*). Son revenu par personne sera selon le modèle de 4070 DT/hab.\nles femmes chefs de ménage ont en moyenne un revenu supérieur de 27% par rapport aux autres chefs de ménage, toutes choses égales quant à leurs caractéristiques.\nle revenu varie de façon non linéaire avec l’âge. Les chefs de ménage de 35-50 ans ont en effet un niveau de revenu inférieur de -7% à celui des 19-34 ans. Par contre il est supérieur de +22% pour les 50-64 ans et de +43% pour les 65 ans et plus.\nle revenu augmente régulièrement avec le niveau d’instruction des chefs de ménage. Par rapport à un non diplômé, le revenu sera augmenté de +13.8% pour un niveau primaire, +39% pour un niveau secondaire et +91% pour un niveau supérieur.\nles ménages ruraux ont des revenus plus faibles que les ménages urbains. La différence est environ de -20% en moyenne.\nle revenu varie fortement selon les régions. Ce résultat n’est évidemment pas une surprise, mais les coefficients d’inégalités sont ici calculés toutes choses égales quant aux autres facteurs (milieu, âge, sexe, instruction) ce qui rend l’analyse plus précise. Par rapport à la région du Grand Tunis, les autres régions se classent par ordre décroissant ainsi : Centre Est (-11.5%), Nord Est (-24.3%), Sud-Ouest (-24.6%), Nord Ouest (-25.7%), Sud Est (-27.6%) et surtout Centre-Ouest (-36.2%)."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#importation-des-données",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#importation-des-données",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Importation des données",
+    "text": "Importation des données\nOn commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS(). On tape ensuite la commande str()pour connaître les caractéristiques de l’objet.\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\")\nstr(base)\n\n'data.frame':   17114 obs. of  11 variables:\n $ id : num  1 2 3 4 5 6 7 8 9 10 ...\n $ reg: Factor w/ 7 levels \"GT\",\"NE\",\"NO\",..: 1 1 1 1 1 1 1 1 1 1 ...\n $ mil: Factor w/ 2 levels \"urbain\",\"rural\": 1 1 1 1 1 1 1 1 1 1 ...\n $ sex: Factor w/ 2 levels \"homme\",\"femme\": 1 1 2 1 1 1 2 1 1 1 ...\n $ age: num  59 52 34 65 35 43 64 71 51 56 ...\n $ mat: Factor w/ 4 levels \"celibataire\",..: 3 3 2 3 3 3 4 3 3 3 ...\n $ ins: Factor w/ 4 levels \"aucun\",\"primaire\",..: 2 2 3 2 3 2 1 3 3 2 ...\n $ csp: Factor w/ 8 levels \"cadre\",\"employé\",..: 7 2 6 8 4 4 4 7 4 4 ...\n $ nbp: num  6 5 2 2 4 5 6 3 2 4 ...\n $ pvr: logi  FALSE FALSE FALSE FALSE FALSE FALSE ...\n $ rev: num  5103 5486 5962 3699 5058 ..."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#liste-des-variables",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#liste-des-variables",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Liste des variables",
+    "text": "Liste des variables\nOn a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Les variables proposées sont les suivantes :\n\nid : identifiant du ménages de 1 à 17114\nreg : région de résidence (NE, NO, CE, CO, SE, SO + Grand Tunis)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : age du chef de ménage\nmat : situation matrimoniale (célbataire, marié, veuf, divorcé)\nins : instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio professionnelle du chef de ménage (simplifiée)\nnbp : nombre de personnes composant le ménage\npauv: situation de pauvreté selon les critères de l’INS (Oui/Non)\nrev : revenu moyen par personnes en DT / an"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#selection-du-tableau-à-analyser",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#selection-du-tableau-à-analyser",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Selection du tableau à analyser",
+    "text": "Selection du tableau à analyser\nOn suppose qu’on ne s’intéresse qu’à quelques variables\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\", \"age\",\"ins\",\"rev\")]\nhead(don)\n\n  reg    mil   sex age        ins  rev\n1  GT urbain homme  59   primaire 5103\n2  GT urbain homme  52   primaire 5486\n3  GT urbain femme  34 secondaire 5962\n4  GT urbain homme  65   primaire 3699\n5  GT urbain homme  35 secondaire 5058\n6  GT urbain homme  43   primaire 3741"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#résumé-rapide",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#résumé-rapide",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Résumé rapide",
+    "text": "Résumé rapide\nOn effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex             age                 ins      \n GT:3944   urbain:10836   homme:13996   Min.   : 19.00   aucun     :3742  \n NE:2458   rural : 6278   femme: 3118   1st Qu.: 46.00   primaire  :6979  \n NO:2502                                Median : 56.00   secondaire:4647  \n CE:2862                                Mean   : 56.34   supérieur :1746  \n CO:2330                                3rd Qu.: 66.00                    \n SE:1845                                Max.   :109.00                    \n SO:1173                                                                  \n      rev        \n Min.   :   185  \n 1st Qu.:  3035  \n Median :  4429  \n Mean   :  5519  \n 3rd Qu.:  6496  \n Max.   :526271  \n                 \n\n\nOn retient comme variable Y quantitative le revenu moyen annuel par personne du ménage. Par exemple si le revenu annuel est de 10000 DT et que ce ménage comporte 4 personnes, alors le revenu moyen annuel par personne sera de 2500 DT."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#la-distribution-de-y-est-elle-normale",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#la-distribution-de-y-est-elle-normale",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.1 La distribution de Y est-elle normale ?",
+    "text": "2.1 La distribution de Y est-elle normale ?\n\nmybreaks &lt;- quantile(don$rev,0:10/10)\npar(mfrow=c(1,2))\nhist(don$rev,\n     breaks = mybreaks,\n     col=\"lightyellow\",\n     probability = TRUE)\nlines(density(don$rev,bw=1000),col=\"red\",lwd=1)\nboxplot(don$rev, col=\"lightyellow\",horizontal = T)\n\n\nLa distribution ne semble pas du tout normale. Elle est très asymétrique et il y a des valeurs très exceptionnelles."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#elimination-des-valeurs-exceptionnelles",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#elimination-des-valeurs-exceptionnelles",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.2 Elimination des valeurs exceptionnelles",
+    "text": "2.2 Elimination des valeurs exceptionnelles\nOn va retirer les individus dont le revenu dépasse 20 000 DT et créer un fichier don2\n\ndon2&lt;-don[don$rev&lt;20000,]\nmybreaks &lt;- quantile(don2$rev,0:10/10)\npar(mfrow=c(1,2))\nhist(don2$rev,\n     breaks = mybreaks,\n     col=\"lightyellow\",\n     probability = TRUE)\nlines(density(don2$rev,bw=1000),col=\"red\",lwd=1)\nboxplot(don2$rev, col=\"lightyellow\",horizontal = T)\n\n\nIl demeure beaucoup de valeurs exceptionnelles et la dissymétrie n’est pas totalement éliminée. On décide donc de descendre juqu’à 15000"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#elimination-des-valeurs-exceptionnelles-1",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#elimination-des-valeurs-exceptionnelles-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.2 Elimination des valeurs exceptionnelles",
+    "text": "2.2 Elimination des valeurs exceptionnelles\nOn va retirer les individus dont le revenu dépasse 10 000 DT et créer un fichier don3\n\ndon3&lt;-don[don$rev&lt;10000,]\nmybreaks &lt;- quantile(don3$rev,0:10/10)\npar(mfrow=c(1,2))\nhist(don3$rev,\n     breaks = mybreaks,\n     col=\"lightyellow\",\n     probability = TRUE)\nlines(density(don3$rev,bw=1000),col=\"red\",lwd=1)\nboxplot(don3$rev, col=\"lightyellow\",horizontal = T)"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#hypothèses",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#hypothèses",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.1 Hypothèses",
+    "text": "3.1 Hypothèses\nOn considère une variable Y quantitative continue définie sur une population de réféence P et une variable X qualitative à deux modalités divisant P en deux sous population P1 et P2.\nSoit par exemple la variable Y = rev et la variable X = mil. On peut se demander si les revenus des ménages urbains sont plus ou moins élevés que ceux des ménages ruraux.\n\nY&lt;-don3$rev\nnomY &lt;-\"Revenu par personne\"\n\nX&lt;-don3$mil\nnomX &lt;- \"Milieu\""
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#visualisations",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#visualisations",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.2 Visualisations",
+    "text": "3.2 Visualisations\nLe plus simple est d’utiliser boxplot() en version de base …\n\nboxplot(Y~X)"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#visualisations-1",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#visualisations-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.2 Visualisations",
+    "text": "3.2 Visualisations\n… ou améliorée\n\nboxplot(Y~X,\n        horizontal=T, \n        xlab = nomY, \n        ylab=nomX, \n        col=\"gray80\")"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#paramètres-principaux",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#paramètres-principaux",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.3 Paramètres principaux",
+    "text": "3.3 Paramètres principaux\nLa fonction tapply() permet de calculer les paramètres statistiques de Y en fonction des modalités de X.\n\nmoy&lt;-tapply(Y,X, mean)\nect&lt;-tapply(Y,X,sd)\ncv&lt;-100*ect/moy\nres&lt;-cbind(moy,ect,cv)\nres\n\n            moy      ect      cv\nurbain 5012.590 2029.743 40.4929\nrural  3684.426 1778.546 48.2720"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#test-dégalité-des-moyennes-1-student",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#test-dégalité-des-moyennes-1-student",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.4 Test d’égalité des moyennes (1) : student",
+    "text": "3.4 Test d’égalité des moyennes (1) : student\nLe test de Student permet de tester l’hypothèse d’égalité des moyennes entre deux échantillons. Il suppose que la distribution est gaussienne.\n\nt.test(Y~X)\n\n\n    Welch Two Sample t-test\n\ndata:  Y by X\nt = 43.062, df = 14200, p-value &lt; 2.2e-16\nalternative hypothesis: true difference in means between group urbain and group rural is not equal to 0\n95 percent confidence interval:\n 1267.708 1388.621\nsample estimates:\nmean in group urbain  mean in group rural \n            5012.590             3684.426"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#test-dégalité-des-moyennes-2-wilcoxon",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#test-dégalité-des-moyennes-2-wilcoxon",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.4 Test d’égalité des moyennes (2) : Wilcoxon",
+    "text": "3.4 Test d’égalité des moyennes (2) : Wilcoxon\nLe test de Wilcoxon permet également de tester l’hypothèse d’égalité des moyennes entre deux échantillons. Il ne suppose que la distribution est gaussienne car il travaille sur les rangs et non pas les valeurs.\n\nwilcox.test(Y~X)\n\n\n    Wilcoxon rank sum test with continuity correction\n\ndata:  Y by X\nW = 40316246, p-value &lt; 2.2e-16\nalternative hypothesis: true location shift is not equal to 0"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#que-faire-lorsque-x-a-plus-de-deux-modalités",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#que-faire-lorsque-x-a-plus-de-deux-modalités",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Que faire lorsque X a plus de deux modalités ?",
+    "text": "Que faire lorsque X a plus de deux modalités ?\nSupposons que nous voulions maintenant examiner la relation entre revenu et niveau d’instruction. On une peut commencer par réaliser une boxplot comme précédemment :\n\nY&lt;-don3$rev\nnomY &lt;-\"Revenu par personne\"\nX&lt;-don3$ins\nnomX &lt;- \"Niveau d'instruction\"\n\nboxplot(Y~X, horizontal=T)"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#que-faire-lorsque-x-a-plus-de-deux-modalités-1",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#que-faire-lorsque-x-a-plus-de-deux-modalités-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Que faire lorsque X a plus de deux modalités ?",
+    "text": "Que faire lorsque X a plus de deux modalités ?\nOn peut également construire un tableau de paramètres par modalités\n\nmoy&lt;-tapply(Y,X, mean)\nect&lt;-tapply(Y,X, sd)\ncv=100*moy/ect\n\nparam&lt;-data.frame(moy,ect,cv)\n\nparam\n\n                moy      ect       cv\naucun      4216.892 1957.342 215.4398\nprimaire   4232.572 1951.893 216.8444\nsecondaire 4769.130 2032.135 234.6857\nsupérieur  5787.599 2162.304 267.6588"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#impossible-dutiliser-le-test-dégalité-de-deux-moyennes",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#impossible-dutiliser-le-test-dégalité-de-deux-moyennes",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Impossible d’utiliser le test d’égalité de deux moyennes",
+    "text": "Impossible d’utiliser le test d’égalité de deux moyennes\nLe test d’égalité des moyennes ne fonctionne que lorsque la variable qualitative Y n’a que deux modalités. On ne peut donc pas l’appliquer pour étudier la relation entre le revenu (Y) et le niveau d’instruction (X) car celui-ci comporte 4 modalités.\nLe programme suivant provoquera une erreur :\n\nt.test(Y~X)\n\nError in t.test.formula(Y ~ X) : grouping factor must have exactly 2 levels"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#solution-générale-lanalyse-de-variance",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#solution-générale-lanalyse-de-variance",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Solution générale : l’analyse de variance",
+    "text": "Solution générale : l’analyse de variance\n\nY&lt;-don3$rev\nmodele &lt;- lm(Y~X)\nsummary(modele)\n\n\nCall:\nlm(formula = Y ~ X)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-5337.6 -1522.6  -304.9  1293.3  5766.4 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  4216.89      33.25  126.81   &lt;2e-16 ***\nXprimaire      15.68      41.24    0.38    0.704    \nXsecondaire   552.24      45.46   12.15   &lt;2e-16 ***\nXsupérieur   1570.71      65.75   23.89   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 1992 on 15614 degrees of freedom\nMultiple R-squared:  0.04776,   Adjusted R-squared:  0.04758 \nF-statistic:   261 on 3 and 15614 DF,  p-value: &lt; 2.2e-16\n\n\nCette méthode étant plus complexe on attendra le cours sur la modélisation pour la discuter plus en détail."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_diapos.html#sexe-du-chef-de-ménage-et-revenu",
+    "href": "STAT2B_biv_quali_quanti_diapos.html#sexe-du-chef-de-ménage-et-revenu",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Sexe du chef de ménage et revenu",
+    "text": "Sexe du chef de ménage et revenu\nVous devez analyser l’existence d’une relation entre les variables revenu moyen annuel du ménage (Y) et sexe du chef de ménage (X).\nQuelle est votre hypothèse H1 ?\nQuelle est votre hypothèse H0 ?\n\n\nflouze"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html",
+    "href": "STAT2B_biv_quali_quanti_cours.html",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "Nous allons importer un fichier de données portant sur les revenus de 17000 ménages tunisiens en 2021. Il est tiré de l’enquête consommation et revenu de l’INS que l’on peut télécharger librement en cliquant ici\n\n\nOn commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS(). On tape ensuite la commande str()pour connaître les caractéristiques de l’objet.\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\")\nstr(base)\n\n'data.frame':   17114 obs. of  11 variables:\n $ id : num  1 2 3 4 5 6 7 8 9 10 ...\n $ reg: Factor w/ 7 levels \"GT\",\"NE\",\"NO\",..: 1 1 1 1 1 1 1 1 1 1 ...\n $ mil: Factor w/ 2 levels \"urbain\",\"rural\": 1 1 1 1 1 1 1 1 1 1 ...\n $ sex: Factor w/ 2 levels \"homme\",\"femme\": 1 1 2 1 1 1 2 1 1 1 ...\n $ age: num  59 52 34 65 35 43 64 71 51 56 ...\n $ mat: Factor w/ 4 levels \"celibataire\",..: 3 3 2 3 3 3 4 3 3 3 ...\n $ ins: Factor w/ 4 levels \"aucun\",\"primaire\",..: 2 2 3 2 3 2 1 3 3 2 ...\n $ csp: Factor w/ 8 levels \"cadre\",\"employé\",..: 7 2 6 8 4 4 4 7 4 4 ...\n $ nbp: num  6 5 2 2 4 5 6 3 2 4 ...\n $ pvr: logi  FALSE FALSE FALSE FALSE FALSE FALSE ...\n $ rev: num  5103 5486 5962 3699 5058 ...\n\n\n\n\n\nOn a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Les variables proposées sont les suivantes :\n\nid : identifiant du ménages de 1 à 17114\nreg : région de résidence (NE, NO, CE, CO, SE, SO + Grand Tunis)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : age du chef de ménage\nmat : situation matrimoniale (célbataire, marié, veuf, divorcé)\nins : instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio professionnelle du chef de ménage (simplifiée)\nnbp : nombre de personnes composant le ménage\npauv: situation de pauvreté selon les critères de l’INS (Oui/Non)\nrev : revenu moyen par personnes en DT / an\n\n\n\n\nOn suppose qu’on ne s’intéresse qu’à quelques variables\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\", \"age\",\"ins\",\"rev\")]\nhead(don)\n\n  reg    mil   sex age        ins  rev\n1  GT urbain homme  59   primaire 5103\n2  GT urbain homme  52   primaire 5486\n3  GT urbain femme  34 secondaire 5962\n4  GT urbain homme  65   primaire 3699\n5  GT urbain homme  35 secondaire 5058\n6  GT urbain homme  43   primaire 3741\n\n\n\n\n\nOn effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex             age                 ins      \n GT:3944   urbain:10836   homme:13996   Min.   : 19.00   aucun     :3742  \n NE:2458   rural : 6278   femme: 3118   1st Qu.: 46.00   primaire  :6979  \n NO:2502                                Median : 56.00   secondaire:4647  \n CE:2862                                Mean   : 56.34   supérieur :1746  \n CO:2330                                3rd Qu.: 66.00                    \n SE:1845                                Max.   :109.00                    \n SO:1173                                                                  \n      rev        \n Min.   :   185  \n 1st Qu.:  3035  \n Median :  4429  \n Mean   :  5519  \n 3rd Qu.:  6496  \n Max.   :526271  \n                 \n\n\nOn retient comme variable Y quantitative le revenu moyen annuel par personne du ménage. Par exemple si le revenu annuel est de 10000 DT et que ce ménage comporte 4 personnes, alors le revenu moyen annuel par personne sera de 2500 DT."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#importation-des-données",
+    "href": "STAT2B_biv_quali_quanti_cours.html#importation-des-données",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS(). On tape ensuite la commande str()pour connaître les caractéristiques de l’objet.\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\")\nstr(base)\n\n'data.frame':   17114 obs. of  11 variables:\n $ id : num  1 2 3 4 5 6 7 8 9 10 ...\n $ reg: Factor w/ 7 levels \"GT\",\"NE\",\"NO\",..: 1 1 1 1 1 1 1 1 1 1 ...\n $ mil: Factor w/ 2 levels \"urbain\",\"rural\": 1 1 1 1 1 1 1 1 1 1 ...\n $ sex: Factor w/ 2 levels \"homme\",\"femme\": 1 1 2 1 1 1 2 1 1 1 ...\n $ age: num  59 52 34 65 35 43 64 71 51 56 ...\n $ mat: Factor w/ 4 levels \"celibataire\",..: 3 3 2 3 3 3 4 3 3 3 ...\n $ ins: Factor w/ 4 levels \"aucun\",\"primaire\",..: 2 2 3 2 3 2 1 3 3 2 ...\n $ csp: Factor w/ 8 levels \"cadre\",\"employé\",..: 7 2 6 8 4 4 4 7 4 4 ...\n $ nbp: num  6 5 2 2 4 5 6 3 2 4 ...\n $ pvr: logi  FALSE FALSE FALSE FALSE FALSE FALSE ...\n $ rev: num  5103 5486 5962 3699 5058 ..."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#liste-des-variables",
+    "href": "STAT2B_biv_quali_quanti_cours.html#liste-des-variables",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Les variables proposées sont les suivantes :\n\nid : identifiant du ménages de 1 à 17114\nreg : région de résidence (NE, NO, CE, CO, SE, SO + Grand Tunis)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : age du chef de ménage\nmat : situation matrimoniale (célbataire, marié, veuf, divorcé)\nins : instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio professionnelle du chef de ménage (simplifiée)\nnbp : nombre de personnes composant le ménage\npauv: situation de pauvreté selon les critères de l’INS (Oui/Non)\nrev : revenu moyen par personnes en DT / an"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#selection-du-tableau-à-analyser",
+    "href": "STAT2B_biv_quali_quanti_cours.html#selection-du-tableau-à-analyser",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On suppose qu’on ne s’intéresse qu’à quelques variables\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\", \"age\",\"ins\",\"rev\")]\nhead(don)\n\n  reg    mil   sex age        ins  rev\n1  GT urbain homme  59   primaire 5103\n2  GT urbain homme  52   primaire 5486\n3  GT urbain femme  34 secondaire 5962\n4  GT urbain homme  65   primaire 3699\n5  GT urbain homme  35 secondaire 5058\n6  GT urbain homme  43   primaire 3741"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#résumé-rapide",
+    "href": "STAT2B_biv_quali_quanti_cours.html#résumé-rapide",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "",
+    "text": "On effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex             age                 ins      \n GT:3944   urbain:10836   homme:13996   Min.   : 19.00   aucun     :3742  \n NE:2458   rural : 6278   femme: 3118   1st Qu.: 46.00   primaire  :6979  \n NO:2502                                Median : 56.00   secondaire:4647  \n CE:2862                                Mean   : 56.34   supérieur :1746  \n CO:2330                                3rd Qu.: 66.00                    \n SE:1845                                Max.   :109.00                    \n SO:1173                                                                  \n      rev        \n Min.   :   185  \n 1st Qu.:  3035  \n Median :  4429  \n Mean   :  5519  \n 3rd Qu.:  6496  \n Max.   :526271  \n                 \n\n\nOn retient comme variable Y quantitative le revenu moyen annuel par personne du ménage. Par exemple si le revenu annuel est de 10000 DT et que ce ménage comporte 4 personnes, alors le revenu moyen annuel par personne sera de 2500 DT."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#la-distribution-de-y-est-elle-normale",
+    "href": "STAT2B_biv_quali_quanti_cours.html#la-distribution-de-y-est-elle-normale",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.1 La distribution de Y est-elle normale ?",
+    "text": "2.1 La distribution de Y est-elle normale ?\n\nmybreaks &lt;- quantile(don$rev,0:10/10)\npar(mfrow=c(1,2))\nhist(don$rev,\n     breaks = mybreaks,\n     col=\"lightyellow\",\n     probability = TRUE)\nlines(density(don$rev,bw=1000),col=\"red\",lwd=1)\nboxplot(don$rev, col=\"lightyellow\",horizontal = T)\n\n\n\n\nLa distribution ne semble pas du tout normale. Elle est très asymétrique et il y a des valeurs très exceptionnelles."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#elimination-des-valeurs-exceptionnelles",
+    "href": "STAT2B_biv_quali_quanti_cours.html#elimination-des-valeurs-exceptionnelles",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "2.2 Elimination des valeurs exceptionnelles",
+    "text": "2.2 Elimination des valeurs exceptionnelles\nOn va retirer les individus dont le revenu dépasse 20 000 DT et créer un fichier don2\n\ndon2&lt;-don[don$rev&lt;20000,]\nmybreaks &lt;- quantile(don2$rev,0:10/10)\npar(mfrow=c(1,2))\nhist(don2$rev,\n     breaks = mybreaks,\n     col=\"lightyellow\",\n     probability = TRUE)\nlines(density(don2$rev,bw=1000),col=\"red\",lwd=1)\nboxplot(don2$rev, col=\"lightyellow\",horizontal = T)\n\n\n\n\nIl demeure beaucoup de valeurs exceptionnelles et la dissymétrie n’est pas totalement éliminée. On décide donc de descendre juqu’à 15000\nOn va retirer les individus dont le revenu dépasse 10 000 DT et créer un fichier don3\n\ndon3&lt;-don[don$rev&lt;10000,]\nmybreaks &lt;- quantile(don3$rev,0:10/10)\npar(mfrow=c(1,2))\nhist(don3$rev,\n     breaks = mybreaks,\n     col=\"lightyellow\",\n     probability = TRUE)\nlines(density(don3$rev,bw=1000),col=\"red\",lwd=1)\nboxplot(don3$rev, col=\"lightyellow\",horizontal = T)"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#hypothèses",
+    "href": "STAT2B_biv_quali_quanti_cours.html#hypothèses",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.1 Hypothèses",
+    "text": "3.1 Hypothèses\nOn considère une variable Y quantitative continue définie sur une population de réféence P et une variable X qualitative à deux modalités divisant P en deux sous population P1 et P2.\nSoit par exemple la variable Y = rev et la variable X = mil. On peut se demander si les revenus des ménages urbains sont plus ou moins élevés que ceux des ménages ruraux.\n\nY&lt;-don3$rev\nnomY &lt;-\"Revenu par personne\"\n\nX&lt;-don3$mil\nnomX &lt;- \"Milieu\""
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#visualisations",
+    "href": "STAT2B_biv_quali_quanti_cours.html#visualisations",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.2 Visualisations",
+    "text": "3.2 Visualisations\nLe plus simple est d’utiliser boxplot() en version de base …\n\nboxplot(Y~X)\n\n\n\n\n… ou améliorée\n\nboxplot(Y~X,\n        horizontal=T, \n        xlab = nomY, \n        ylab=nomX, \n        col=\"gray80\")"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#paramètres-principaux",
+    "href": "STAT2B_biv_quali_quanti_cours.html#paramètres-principaux",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.3 Paramètres principaux",
+    "text": "3.3 Paramètres principaux\nLa fonction tapply() permet de calculer les paramètres statistiques de Y en fonction des modalités de X.\n\nmoy&lt;-tapply(Y,X, mean)\nect&lt;-tapply(Y,X,sd)\ncv&lt;-100*ect/moy\nres&lt;-cbind(moy,ect,cv)\nres\n\n            moy      ect      cv\nurbain 5012.590 2029.743 40.4929\nrural  3684.426 1778.546 48.2720"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#test-dégalité-des-moyennes",
+    "href": "STAT2B_biv_quali_quanti_cours.html#test-dégalité-des-moyennes",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "3.4 Test d’égalité des moyennes",
+    "text": "3.4 Test d’égalité des moyennes\n\nTest de student\nLe test de Student permet de tester l’hypothèse d’égalité des moyennes entre deux échantillons. Il suppose que la distribution est gaussienne.\n\nt.test(Y~X)\n\n\n    Welch Two Sample t-test\n\ndata:  Y by X\nt = 43.062, df = 14200, p-value &lt; 2.2e-16\nalternative hypothesis: true difference in means between group urbain and group rural is not equal to 0\n95 percent confidence interval:\n 1267.708 1388.621\nsample estimates:\nmean in group urbain  mean in group rural \n            5012.590             3684.426 \n\n\n\n\nTest de Wilcoxon\nLe test de Wilcoxon permet également de tester l’hypothèse d’égalité des moyennes entre deux échantillons. Il ne suppose que la distribution est gaussienne car il travaille sur les rangs et non pas les valeurs.\n\nwilcox.test(Y~X)\n\n\n    Wilcoxon rank sum test with continuity correction\n\ndata:  Y by X\nW = 40316246, p-value &lt; 2.2e-16\nalternative hypothesis: true location shift is not equal to 0"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#que-faire-lorsque-x-a-plus-de-deux-modalités",
+    "href": "STAT2B_biv_quali_quanti_cours.html#que-faire-lorsque-x-a-plus-de-deux-modalités",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Que faire lorsque X a plus de deux modalités ?",
+    "text": "Que faire lorsque X a plus de deux modalités ?\nSupposons que nous voulions maintenant examiner la relation entre revenu et niveau d’instruction. On une peut commencer par réaliser une boxplot comme précédemment :\n\nY&lt;-don3$rev\nnomY &lt;-\"Revenu par personne\"\nX&lt;-don3$ins\nnomX &lt;- \"Niveau d'instruction\"\n\nboxplot(Y~X, horizontal=T)\n\n\n\n\nOn peut également construire un tableau de paramètres par modalités\n\nmoy&lt;-tapply(Y,X, mean)\nect&lt;-tapply(Y,X, sd)\ncv=100*moy/ect\n\nparam&lt;-data.frame(moy,ect,cv)\n\nparam\n\n                moy      ect       cv\naucun      4216.892 1957.342 215.4398\nprimaire   4232.572 1951.893 216.8444\nsecondaire 4769.130 2032.135 234.6857\nsupérieur  5787.599 2162.304 267.6588"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#impossible-dutiliser-le-test-dégalité-de-deux-moyennes",
+    "href": "STAT2B_biv_quali_quanti_cours.html#impossible-dutiliser-le-test-dégalité-de-deux-moyennes",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Impossible d’utiliser le test d’égalité de deux moyennes",
+    "text": "Impossible d’utiliser le test d’égalité de deux moyennes\nLe test d’égalité des moyennes ne fonctionne que lorsque la variable qualitative Y n’a que deux modalités. On ne peut donc pas l’appliquer pour étudier la relation entre le revenu (Y) et le niveau d’instruction (X) car celui-ci comporte 4 modalités.\nLe programme suivant provoquera une erreur :\n\nt.test(Y~X)\n\nError in t.test.formula(Y ~ X) : grouping factor must have exactly 2 levels"
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#solution-générale-lanalyse-de-variance",
+    "href": "STAT2B_biv_quali_quanti_cours.html#solution-générale-lanalyse-de-variance",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Solution générale : l’analyse de variance",
+    "text": "Solution générale : l’analyse de variance\n\nY&lt;-don3$rev\nmodele &lt;- lm(Y~X)\nsummary(modele)\n\n\nCall:\nlm(formula = Y ~ X)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-5337.6 -1522.6  -304.9  1293.3  5766.4 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  4216.89      33.25  126.81   &lt;2e-16 ***\nXprimaire      15.68      41.24    0.38    0.704    \nXsecondaire   552.24      45.46   12.15   &lt;2e-16 ***\nXsupérieur   1570.71      65.75   23.89   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 1992 on 15614 degrees of freedom\nMultiple R-squared:  0.04776,   Adjusted R-squared:  0.04758 \nF-statistic:   261 on 3 and 15614 DF,  p-value: &lt; 2.2e-16\n\n\nCette méthode étant plus complexe on attendra le cours sur la modélisation pour la discuter plus en détail."
+  },
+  {
+    "objectID": "STAT2B_biv_quali_quanti_cours.html#sexe-du-chef-de-ménage-et-revenu",
+    "href": "STAT2B_biv_quali_quanti_cours.html#sexe-du-chef-de-ménage-et-revenu",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Sexe du chef de ménage et revenu",
+    "text": "Sexe du chef de ménage et revenu\nVous devez analyser l’existence d’une relation entre les variables revenu moyen annuel du ménage (Y) et sexe du chef de ménage (X).\nQuelle est votre hypothèse H1 ?\nQuelle est votre hypothèse H0 ?\n\n\n\nflouze"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "A propos",
+    "section": "",
+    "text": "bla bla bla"
+  },
+  {
+    "objectID": "index.html#geounivr-2024",
+    "href": "index.html#geounivr-2024",
+    "title": "A propos",
+    "section": "",
+    "text": "bla bla bla"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#importation-des-données",
+    "href": "STAT1_Univariee_diapos.html#importation-des-données",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "Importation des données",
+    "text": "Importation des données\nOn commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS() qui permet de lire les fichiers sauvegardés sans le format interne de R et on affiche les 6 premières lignes\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\")  \nhead(base)\n\n  id reg    mil   sex age     mat        ins      csp nbp   pvr  rev\n1  1  GT urbain homme  59   marie   primaire retraité   6 FALSE 5103\n2  2  GT urbain homme  52   marie   primaire  employé   5 FALSE 5486\n3  3  GT urbain femme  34 divorce secondaire  chomeur   2 FALSE 5962\n4  4  GT urbain homme  65   marie   primaire  inactif   2 FALSE 3699\n5  5  GT urbain homme  35   marie secondaire  ouvrier   4 FALSE 5058\n6  6  GT urbain homme  43   marie   primaire  ouvrier   5 FALSE 3741"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#liste-des-variables",
+    "href": "STAT1_Univariee_diapos.html#liste-des-variables",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "Liste des variables",
+    "text": "Liste des variables\nOn a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Les variables proposées sont les suivantes :\n\nid : identifiant du ménages de 1 à 17114\nreg : région de résidence (NE, NO, CE, CO, SE, SO + Grand Tunis)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : age du chef de ménage\nmat : situation matrimoniale (célbataire, marié, veuf, divorcé)\nins : instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio professionnelle du chef de ménage (simplifiée)\nnbp : nombre de personnes composant le ménage\npauv: situation de pauvreté selon les critères de l’INS (Oui/Non)\nrev : revenu moyen par personnes en DT / an"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#selection-du-tableau-à-analyser",
+    "href": "STAT1_Univariee_diapos.html#selection-du-tableau-à-analyser",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "Selection du tableau à analyser",
+    "text": "Selection du tableau à analyser\nOn suppose qu’on ne s’intéresse qu’à quelques variables\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\", \"age\",\"ins\",\"pvr\",\"rev\")]\nhead(don)\n\n  reg    mil   sex age        ins   pvr  rev\n1  GT urbain homme  59   primaire FALSE 5103\n2  GT urbain homme  52   primaire FALSE 5486\n3  GT urbain femme  34 secondaire FALSE 5962\n4  GT urbain homme  65   primaire FALSE 3699\n5  GT urbain homme  35 secondaire FALSE 5058\n6  GT urbain homme  43   primaire FALSE 3741"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#résumé-rapide",
+    "href": "STAT1_Univariee_diapos.html#résumé-rapide",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "Résumé rapide",
+    "text": "Résumé rapide\nOn effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex             age                 ins      \n GT:3944   urbain:10836   homme:13996   Min.   : 19.00   aucun     :3742  \n NE:2458   rural : 6278   femme: 3118   1st Qu.: 46.00   primaire  :6979  \n NO:2502                                Median : 56.00   secondaire:4647  \n CE:2862                                Mean   : 56.34   supérieur :1746  \n CO:2330                                3rd Qu.: 66.00                    \n SE:1845                                Max.   :109.00                    \n SO:1173                                                                  \n    pvr               rev        \n Mode :logical   Min.   :   185  \n FALSE:14665     1st Qu.:  3035  \n TRUE :2449      Median :  4429  \n                 Mean   :  5519  \n                 3rd Qu.:  6496  \n                 Max.   :526271"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#choix-de-la-variables",
+    "href": "STAT1_Univariee_diapos.html#choix-de-la-variables",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "Choix de la variables",
+    "text": "Choix de la variables\nNous allons prendre comme exemple la variable ins que l’on va extraire du tableau pour en faire un vecteur X qui est de type factor\n\nX &lt;-don$ins\nclass(X)\n\n[1] \"factor\""
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#tableau-de-dénombrement",
+    "href": "STAT1_Univariee_diapos.html#tableau-de-dénombrement",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "2.1 tableau de dénombrement",
+    "text": "2.1 tableau de dénombrement\nPour dénomber une variable qualitative, on utilise l’instruction table() qui crée un objet particulier qui n’est ni un data.frame, ni une matrix.\ncréation et affichage du tableau\n\ntab&lt;-table(X)\ntab\n\nX\n     aucun   primaire secondaire  supérieur \n      3742       6979       4647       1746"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#tableau-de-dénombrement-1",
+    "href": "STAT1_Univariee_diapos.html#tableau-de-dénombrement-1",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "2.1 tableau de dénombrement",
+    "text": "2.1 tableau de dénombrement\nAjout du total\nUn objet de type table peut être manipulé par des fonctions spéciales comme addmargins()\n\ntab2&lt;-addmargins(tab)\ntab2\n\nX\n     aucun   primaire secondaire  supérieur        Sum \n      3742       6979       4647       1746      17114"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#tableau-de-dénombrement-2",
+    "href": "STAT1_Univariee_diapos.html#tableau-de-dénombrement-2",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "2.1 tableau de dénombrement",
+    "text": "2.1 tableau de dénombrement\nTransformation en fréquence\nOn peut également passer en fréquence avec la fonction prop.table()\n\ntab3&lt;-prop.table(tab)\ntab3\n\nX\n     aucun   primaire secondaire  supérieur \n 0.2186514  0.4077948  0.2715321  0.1020217"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#tableau-de-dénombrement-3",
+    "href": "STAT1_Univariee_diapos.html#tableau-de-dénombrement-3",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "2.1 tableau de dénombrement",
+    "text": "2.1 tableau de dénombrement\nTransformation en pourcentage\nOn peut finalement afficher le résultat sous une forme élégante :\n\ntab4&lt;-100*addmargins(tab3)\ntab4\n\nX\n     aucun   primaire secondaire  supérieur        Sum \n  21.86514   40.77948   27.15321   10.20217  100.00000"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#visualiation",
+    "href": "STAT1_Univariee_diapos.html#visualiation",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "2.3 Visualiation",
+    "text": "2.3 Visualiation\nLa fonction plot() s’applique à la plupart de objets R. Elle s’adapte au type d’objet et va chercher la fonction la plus adaptée au type de variable. Dans le cas d’une variable de type factor, la fonction plot() appelle en réalité la fonction barplot() après avoir effectué le dénombrement avec table()\nDiagramme en bâtons\n\n# Ecriture simple\nplot(X)\n\n# Ecriture équivalente\n# barplot(table(X))"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#visualiation-1",
+    "href": "STAT1_Univariee_diapos.html#visualiation-1",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "2.3 Visualiation",
+    "text": "2.3 Visualiation\nplot amélioré\n\nplot(X,col=c(\"orange\",\"yellow\",\n             \"lightyellow\",\"lightgreen\"), \n     main= \"Niveau d'instruction des chefs de ménages\",\n     xlab = \"niveau\", \n     ylab = \"Nombre de ménages\",\n     sub = \"Source : INS, 2021\")"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#valeurs-centrales-et-paramètres-de-dispersion",
+    "href": "STAT1_Univariee_diapos.html#valeurs-centrales-et-paramètres-de-dispersion",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.1 Valeurs centrales et paramètres de dispersion",
+    "text": "3.1 Valeurs centrales et paramètres de dispersion\nfonctions élémentaires\nUne variable numérique peut faire l’objet d’un ensemble de résumés statistiques à l’aide de fonctions élémentaires\n\nmin() : minimum\nmax() : maximum\nmean() : moyenne\nsd() : écart-type\nsum() : somme"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#valeurs-centrales-et-paramètres-de-dispersion-1",
+    "href": "STAT1_Univariee_diapos.html#valeurs-centrales-et-paramètres-de-dispersion-1",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.1 Valeurs centrales et paramètres de dispersion",
+    "text": "3.1 Valeurs centrales et paramètres de dispersion\nOn va prendre l’exemple du revenu moyen par habitant\n\nX &lt;- don$rev\nmin(X)\n\n[1] 185\n\nmax(X)\n\n[1] 526271\n\nmean(X)\n\n[1] 5519.385\n\nsd(X)\n\n[1] 7036.663"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#valeurs-centrales-et-paramètres-de-dispersion-2",
+    "href": "STAT1_Univariee_diapos.html#valeurs-centrales-et-paramètres-de-dispersion-2",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.1 Valeurs centrales et paramètres de dispersion",
+    "text": "3.1 Valeurs centrales et paramètres de dispersion\nquantiles\nPour calculer les quantiles on peut utiliser la fonction quantile() en paramétrant la valeur de fréquence cumulée ascendante\n\nquantile(X,0) : minimum\nquantile(X,0.10) : D1 (premier décile)\nquantile(X,0.25) : Q1 (premier quartile)\nquantile(X,0.5) : Q2 (médiane)\nquantile(X,0.75) : Q3 (troisième quartile)\nquantile(X,0.90) : D9 (dernier décile)\nquantile(X,1) : maximum"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#valeurs-centrales-et-paramètres-de-dispersion-3",
+    "href": "STAT1_Univariee_diapos.html#valeurs-centrales-et-paramètres-de-dispersion-3",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.1 Valeurs centrales et paramètres de dispersion",
+    "text": "3.1 Valeurs centrales et paramètres de dispersion\nquantiles\n\nX&lt;-don$rev\nquantile(X,0.5)\n\n 50% \n4429 \n\nsel&lt;-c(0,0.25,0.5,0.75,1)\nquantile(X,sel)\n\n       0%       25%       50%       75%      100% \n   185.00   3035.00   4429.00   6495.75 526271.00 \n\nsel&lt;-c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)\nquantile(X,sel)\n\n      0%      10%      20%      30%      40%      50%      60%      70% \n   185.0   2143.6   2757.0   3304.0   3854.0   4429.0   5104.0   5941.0 \n     80%      90%     100% \n  7151.0   9480.4 526271.0"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#tableau-de-dénombrement-discrétisation",
+    "href": "STAT1_Univariee_diapos.html#tableau-de-dénombrement-discrétisation",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.2 Tableau de dénombrement (discrétisation)",
+    "text": "3.2 Tableau de dénombrement (discrétisation)\nUne variable quantitative peut être discrétisée avec cut(). Elle devient alors un facteur qu’on peut dénomber avec table()\n\nXQ&lt;-cut(don$rev, c(0, 500, 1000, 2000, 5000, 10000, 20000, 50000, 1000000))\ntable(XQ)\n\nXQ\n      (0,500]   (500,1e+03] (1e+03,2e+03] (2e+03,5e+03] (5e+03,1e+04] \n            7            92          1269          8664          5586 \n(1e+04,2e+04] (2e+04,5e+04] (5e+04,1e+06] \n         1333           134            29"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#boîte-à-moustaches",
+    "href": "STAT1_Univariee_diapos.html#boîte-à-moustaches",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.3 Boîte à moustaches",
+    "text": "3.3 Boîte à moustaches\nLa fonction boxplot() permet de visualiser une distribution sous forme de boîte à moustache où l’on repère facilement :\n\nla médiane\nles quartiles Q1 et Q3\nle minimum et le maximum\nles valeurs extrêmes"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#boîte-à-moustaches-1",
+    "href": "STAT1_Univariee_diapos.html#boîte-à-moustaches-1",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.3 Boîte à moustaches",
+    "text": "3.3 Boîte à moustaches\nBoxplot simple\n\nboxplot(X)"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#boîte-à-moustaches-2",
+    "href": "STAT1_Univariee_diapos.html#boîte-à-moustaches-2",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.3 Boîte à moustaches",
+    "text": "3.3 Boîte à moustaches\nBoxplot améliorée\n\nboxplot(X,horizontal = TRUE, \n        col = \"gray80\",\n        main = \"Revenu par habitant des ménages\",\n        xlab = \"en DT\",\n        outline = F \n        )"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#histogramme",
+    "href": "STAT1_Univariee_diapos.html#histogramme",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.4 Histogramme",
+    "text": "3.4 Histogramme\nDans le cas d’une variable quantitative continue, la visualisation la plus logique est l’histogramme que l’on peut tracer avec la fonction hist(). Celle-ci comporte plusieurs paramètres que l’on peut visualiser en allant dans l’onglet Help et en tapant le nom de la fonction. On retiendra surtout ici\n\nbreaks : contrôle le choix des classes\nprobability : affiche la densité et non pas l’effectif des classes"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#histogramme-1",
+    "href": "STAT1_Univariee_diapos.html#histogramme-1",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.4 Histogramme",
+    "text": "3.4 Histogramme\nHistogramme simple\n\n\nX&lt;-don$rev\nhist(X)"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#histogramme-2",
+    "href": "STAT1_Univariee_diapos.html#histogramme-2",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.4 Histogramme",
+    "text": "3.4 Histogramme\nHistogramme amélioré\n\n\nX&lt;-don$rev\n\n# Choix des classes\nmybreaks&lt;-c(min(X),1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,\n                       11000, 12000, 13000, 14000, 15000,16000,\n            17000, 18000, 19000, 20000, max(X))\n\nhist(X,\n     breaks = mybreaks, \n     col=\"lightyellow\",\n     main = \"Revenu des ménages tunisiens en 2021\",\n     sub = \"Source : INS, 2021\",\n     xlab = \"en DT par personne et par an\",\n     ylab = \"Probabilité\",\n     xlim=c(0,20000))"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#histogramme-3",
+    "href": "STAT1_Univariee_diapos.html#histogramme-3",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "3.4 Histogramme",
+    "text": "3.4 Histogramme\nHistogramme superbe\n\n\nX&lt;-don$rev\n\n# Choix des classes\nmybreaks&lt;-c(min(X),1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,\n                       11000, 12000, 13000, 14000, 15000,16000,\n            17000, 18000, 19000, 20000, max(X))\n\nhist(X,\n     breaks = mybreaks, \n     col=\"lightyellow\",\n     main = \"Revenu des ménages tunisiens en 2021\",\n     sub = \"Source : INS, 2021\",\n     xlab = \"en DT par personne et par an\",\n     ylab = \"Probabilité\",\n     xlim=c(0,20000))\n\n# Ajout d'une courbe de Probabilité lissée\nlines(density(X,\n              bw = sd(X)/2),\n              col=\"red\", lwd=2)\n\n# Ajout de la moyenne et de la médiane\nabline(v=mean(X), col=\"blue\")\nabline(v=median(X), col=\"green\")"
+  },
+  {
+    "objectID": "STAT1_Univariee_diapos.html#objectif",
+    "href": "STAT1_Univariee_diapos.html#objectif",
+    "title": "STAT1 : Statistiques Univariées",
+    "section": "Objectif",
+    "text": "Objectif\nVous allez maintenant essayer de reprendre les programmes précédents en analysant successivement une variable qualitative et une variable quantitative."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#importation-des-données",
+    "href": "STAT2A_biv_quali_quali_diapos.html#importation-des-données",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Importation des données",
+    "text": "Importation des données\nOn commence par charger les données contenues dans le fichier enq_INS_conso_menages_2021.RDS à l’aide de la fonction readRDS() qui permet de lire les fichiers sauvegardés sans le format interne de R et on affiche les 6 premières lignes\n\n# Importe les données au format interne de R\nbase&lt;-readRDS(\"ENQ-TUN-2021/enq_INS_conso_menages_2021.RDS\")"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#liste-des-variables",
+    "href": "STAT2A_biv_quali_quali_diapos.html#liste-des-variables",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Liste des variables",
+    "text": "Liste des variables\nOn a légèrement changé le fichier initial de l’INS en simplifiant les noms des variables et en fusionnant certaines modalités. Les variables proposées sont les suivantes :\n\nid : identifiant du ménages de 1 à 17114\nreg : région de résidence (NE, NO, CE, CO, SE, SO + Grand Tunis)\nmil : milieu de résidence (urbain ou rural)\nsex : sexe du chef de ménage\nage : age du chef de ménage\nmat : situation matrimoniale (célbataire, marié, veuf, divorcé)\nins : instruction du chef de ménage (aucune, primaire, secondaire, supérieur)\ncsp : catégorie socio professionnelle du chef de ménage (simplifiée)\nnbp : nombre de personnes composant le ménage\npauv: situation de pauvreté selon les critères de l’INS (Oui/Non)\nrev : revenu moyen par personnes en DT / an"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#selection-du-tableau-à-analyser",
+    "href": "STAT2A_biv_quali_quali_diapos.html#selection-du-tableau-à-analyser",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Selection du tableau à analyser",
+    "text": "Selection du tableau à analyser\nOn suppose qu’on ne s’intéresse qu’à quelques variables de type qualitatif.\n\ndon&lt;-base[,c(\"reg\",\"mil\",\"sex\",\"ins\",\"pvr\")]\nhead(don)\n\n  reg    mil   sex        ins   pvr\n1  GT urbain homme   primaire FALSE\n2  GT urbain homme   primaire FALSE\n3  GT urbain femme secondaire FALSE\n4  GT urbain homme   primaire FALSE\n5  GT urbain homme secondaire FALSE\n6  GT urbain homme   primaire FALSE"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#recodage-de-la-variable-pvr",
+    "href": "STAT2A_biv_quali_quali_diapos.html#recodage-de-la-variable-pvr",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Recodage de la variable pvr",
+    "text": "Recodage de la variable pvr\nLa variable pvr exprime sous forme logique le fait qu’un ménage soit riche ou pauvre. Elle a été créée par l’INS en tenant compte du revenu, du nombre de personnes mais aussi de la région et du milieu rural ou urbain. Un revenu de 1000 Dt n’aura en effet pas le même effet selon qu’on habite à Tunis ou Sidi Bouzid.\nOn décide de la recoder en “Pauvre”, “Non Pauvre”.\n\n# Transforme du type logic au type factor\ndon$pvr&lt;-as.factor(don$pvr)\n\n# Examine les étiquettes\ntable(don$pvr)\n\n\nFALSE  TRUE \n14665  2449 \n\n# Change les étiquettes \nlevels(don$pvr)&lt;-c(\"Non pauvre\",\"Pauvre\")\n\n# Examine les nouvelles étiquettes\ntable(don$pvr)\n\n\nNon pauvre     Pauvre \n     14665       2449"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#résumé-rapide",
+    "href": "STAT2A_biv_quali_quali_diapos.html#résumé-rapide",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Résumé rapide",
+    "text": "Résumé rapide\nOn effectue un résumé rapide du tableau à l’aide de la fonction summary():\n\nsummary(don)\n\n reg           mil           sex                ins               pvr       \n GT:3944   urbain:10836   homme:13996   aucun     :3742   Non pauvre:14665  \n NE:2458   rural : 6278   femme: 3118   primaire  :6979   Pauvre    : 2449  \n NO:2502                                secondaire:4647                     \n CE:2862                                supérieur :1746                     \n CO:2330                                                                    \n SE:1845                                                                    \n SO:1173"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#création",
+    "href": "STAT2A_biv_quali_quali_diapos.html#création",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Création",
+    "text": "Création\nLe coeur du travail d’analyse du questionnaire est la réalisation de tris croisés c’est-à-dire de tableaux de contingence croisant les réponses à deux questions (X et Y). Prenons comme exemple la pauvreté du ménage (pvr) définie par l’INS comme une variable binaire (Y) et le niveau d’instruction (ins) du chef de ménage (X) en quatre classes.\ntableau de contingence\n\nX&lt;-don$ins\nY&lt;-don$pvr\ntab&lt;-table(X,Y)\naddmargins(tab)\n\n            Y\nX            Non pauvre Pauvre   Sum\n  aucun            3098    644  3742\n  primaire         5755   1224  6979\n  secondaire       4145    502  4647\n  supérieur        1667     79  1746\n  Sum             14665   2449 17114\n\n\nExemple de lecture : 644 ménages ont un chef sans diplôme et sont pauvres."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#pourcentage-en-ligne",
+    "href": "STAT2A_biv_quali_quali_diapos.html#pourcentage-en-ligne",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Pourcentage en ligne",
+    "text": "Pourcentage en ligne\nLe tableau de contingence permet de produire différents tableaux de pourcentage.\n\nlprop(tab)\n\n            Y\nX            Non pauvre Pauvre Total\n  aucun       82.8       17.2  100.0\n  primaire    82.5       17.5  100.0\n  secondaire  89.2       10.8  100.0\n  supérieur   95.5        4.5  100.0\n  All         85.7       14.3  100.0\n\n\nExemple de lecture : 17.2% des ménages dont le chef n’a pas de diplôme sont pauvres"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#pourcentage-en-colonnes",
+    "href": "STAT2A_biv_quali_quali_diapos.html#pourcentage-en-colonnes",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "pourcentage en colonnes",
+    "text": "pourcentage en colonnes\nLe tableau de contingence permet de produire différents tableaux de pourcentage.\n\ncprop(tab)\n\n            Y\nX            Non pauvre Pauvre All  \n  aucun       21.1       26.3   21.9\n  primaire    39.2       50.0   40.8\n  secondaire  28.3       20.5   27.2\n  supérieur   11.4        3.2   10.2\n  Total      100.0      100.0  100.0\n\n\nExemple de lecture : 26.3% des ménages pauvres ont pour chef une personne non diplômée"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#pourcentage-du-total",
+    "href": "STAT2A_biv_quali_quali_diapos.html#pourcentage-du-total",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "pourcentage du total",
+    "text": "pourcentage du total\n\nprop(tab)\n\n            Y\nX            Non pauvre Pauvre Total\n  aucun       18.1        3.8   21.9\n  primaire    33.6        7.2   40.8\n  secondaire  24.2        2.9   27.2\n  supérieur    9.7        0.5   10.2\n  Total       85.7       14.3  100.0\n\n\nExemple de lecture : 3.8% des ménages sont pauvres et ont pour chef une personne non diplômée"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#utilisation-de-mosaicplot",
+    "href": "STAT2A_biv_quali_quali_diapos.html#utilisation-de-mosaicplot",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Utilisation de mosaicplot",
+    "text": "Utilisation de mosaicplot\nIl est facile de visualiser un tableau de contingence avec mosaicplot()\n\nmosaicplot(tab)\n\n\nCette figure est très pratique car elle montre à la fois l’effectif des ménages par diplôme (largeur de la barre) et la proportion de ménages pauvres (hauteur à laquelle la barre est coupée)"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#utilisation-de-mosaicplot-1",
+    "href": "STAT2A_biv_quali_quali_diapos.html#utilisation-de-mosaicplot-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Utilisation de mosaicplot",
+    "text": "Utilisation de mosaicplot\nOn peut ensuite améliorer le figure\n\nmosaicplot(tab,\n           xlab = \"Diplôme du chef de ménage\",\n           ylab = \"Pauvreté\",\n           main = \"Relation entre diplome et pauvreté en Tunisie en 2021\",\n           sub = \"Source : INS, 2021\",\n           col=c(\"lightyellow\", \"orange\"))"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#hypothèse-de-recherche",
+    "href": "STAT2A_biv_quali_quali_diapos.html#hypothèse-de-recherche",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Hypothèse de recherche",
+    "text": "Hypothèse de recherche\nOn remarque qu’il semble exister un lien entre le niveau de diplôme du chef de ménage. Cette relation semble négative puisque les ménages les moins instruits sont ceux qui sont le plus souvent pauvre. On a donc envie d’affirmer l’hypothèse de recherche H1 :\nH1: Dans le cas de la population tunisienne en 2021, il existe un lien entre le niveau de diplôme du chef de ménage (X) et la situation de pauvreté (Y).\nEn statistique, on ne teste jamais directement l’hypothèse H1 (il y a une relation entre X et Y) mais on teste l’hypothèse inverse (il n’y a pas de relation entre X et Y) qu’on appelle hypothèse nulle."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#hypothèse-nulle",
+    "href": "STAT2A_biv_quali_quali_diapos.html#hypothèse-nulle",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Hypothèse nulle",
+    "text": "Hypothèse nulle\nPourquoi cette complication apparente ?\n\nParce que l’hypothèse nulle est plus rigoureuse et revient à se demander si ce n’est pas le hasard qui explique les différence de pourcentage observées. Dans notre exemple on va donc poser :\n\nH0 : Il n’y a pas de relation entre le niveau de diplôme (X) et le fait d’être pauvre (Y). Les différences de pourcentage que nous avons mises en évidence peuvent très bien être l’effet du hasard."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#la-fonction-chisq.test",
+    "href": "STAT2A_biv_quali_quali_diapos.html#la-fonction-chisq.test",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "La fonction chisq.test()",
+    "text": "La fonction chisq.test()\nCette fonction très puissance s’applique à un tableau de contingence créé avec la fonction table(). Elle renvoie un gros objet que l’on va stocker pour en extraire les résultats dont on a besoin. On peut choisir le nom de l’objet dans lequel seront stockés les résultats. Ici je vais choisir le nom resul mais j’aurais aussi bien pu l’appeler toto ou titi.\n\nresul&lt;-chisq.test(tab)\nclass(resul)\n\n[1] \"htest\"\n\n\nL’instruction class() nousindique que l’objet a un type spécial appelé htest. Il s’agit en fait d’une liste de résultats, comme un gros sac de course remplis de fruits, légumes, pain, etc."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#la-fonction-chisq.test-1",
+    "href": "STAT2A_biv_quali_quali_diapos.html#la-fonction-chisq.test-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "La fonction chisq.test()",
+    "text": "La fonction chisq.test()\nQu’y a-t-il dans l’objet resul ?\n\nstr(resul)\n\nList of 9\n $ statistic: Named num 268\n  ..- attr(*, \"names\")= chr \"X-squared\"\n $ parameter: Named int 3\n  ..- attr(*, \"names\")= chr \"df\"\n $ p.value  : num 8.6e-58\n $ method   : chr \"Pearson's Chi-squared test\"\n $ data.name: chr \"tab\"\n $ observed : 'table' int [1:4, 1:2] 3098 5755 4145 1667 644 1224 502 79\n  ..- attr(*, \"dimnames\")=List of 2\n  .. ..$ X: chr [1:4] \"aucun\" \"primaire\" \"secondaire\" \"supérieur\"\n  .. ..$ Y: chr [1:2] \"Non pauvre\" \"Pauvre\"\n $ expected : num [1:4, 1:2] 3207 5980 3982 1496 535 ...\n  ..- attr(*, \"dimnames\")=List of 2\n  .. ..$ X: chr [1:4] \"aucun\" \"primaire\" \"secondaire\" \"supérieur\"\n  .. ..$ Y: chr [1:2] \"Non pauvre\" \"Pauvre\"\n $ residuals: 'table' num [1:4, 1:2] -1.92 -2.91 2.58 4.42 4.69 ...\n  ..- attr(*, \"dimnames\")=List of 2\n  .. ..$ X: chr [1:4] \"aucun\" \"primaire\" \"secondaire\" \"supérieur\"\n  .. ..$ Y: chr [1:2] \"Non pauvre\" \"Pauvre\"\n $ stdres   : 'table' num [1:4, 1:2] -5.73 -10.01 8 12.32 5.73 ...\n  ..- attr(*, \"dimnames\")=List of 2\n  .. ..$ X: chr [1:4] \"aucun\" \"primaire\" \"secondaire\" \"supérieur\"\n  .. ..$ Y: chr [1:2] \"Non pauvre\" \"Pauvre\"\n - attr(*, \"class\")= chr \"htest\"\n\n\nPlein de choses …"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#distribution-observée",
+    "href": "STAT2A_biv_quali_quali_diapos.html#distribution-observée",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Distribution observée",
+    "text": "Distribution observée\nOn retrouve dans l’objet resul notre tableau de contingence initial\nNij = effectifs observés\n\ntabobs &lt;- resul$observed\naddmargins(tabobs)\n\n            Y\nX            Non pauvre Pauvre   Sum\n  aucun            3098    644  3742\n  primaire         5755   1224  6979\n  secondaire       4145    502  4647\n  supérieur        1667     79  1746\n  Sum             14665   2449 17114"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#distribution-théorique",
+    "href": "STAT2A_biv_quali_quali_diapos.html#distribution-théorique",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Distribution théorique",
+    "text": "Distribution théorique\nAfin de voir si le hasard est effectivement intervenu, on va reconstituer ce que serait le tableau de contingence croisant X et Y dans le cas où les deux variables ne sont pas reliées. On extrait cette information de l’objet resul la partie appelée expected.\nTij = (Ni. x N.j)/N..\n\ntabtheo &lt;- resul$expected\nround(addmargins(tabtheo),1)\n\n            Y\nX            Non pauvre Pauvre   Sum\n  aucun          3206.5  535.5  3742\n  primaire       5980.3  998.7  6979\n  secondaire     3982.0  665.0  4647\n  supérieur      1496.1  249.9  1746\n  Sum           14665.0 2449.0 17114"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#résidus",
+    "href": "STAT2A_biv_quali_quali_diapos.html#résidus",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Résidus",
+    "text": "Résidus\nOn va ensuite mesurer les écarts entre effectifs observés et théoriques appelés résidus (Nij-Tij).\nRésidus (Nij-Tij)\n\ntabresid &lt;- tabobs-tabtheo\nround(addmargins(tabresid),1)\n\n            Y\nX            Non pauvre Pauvre    Sum\n  aucun          -108.5  108.5    0.0\n  primaire       -225.3  225.3    0.0\n  secondaire      163.0 -163.0    0.0\n  supérieur       170.9 -170.9    0.0\n  Sum               0.0    0.0    0.0"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#chi-2",
+    "href": "STAT2A_biv_quali_quali_diapos.html#chi-2",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Chi-2",
+    "text": "Chi-2\nOn va ensuite exprimer les écartes entre effectifs observés et estimés sous une forme mathématique appelée chi2 définie par la formule (Nij-Tij)x(Nij-Tij)/Tij. Ce résultat n’est pas fourni mais on peut le calculer :\nChi-2 = (Nij-Tij)x(Nij-Tij)/Tij\n\ntabchi2&lt;-(tabobs-tabtheo)**2 / tabtheo\nround(addmargins(tabchi2),1)\n\n            Y\nX            Non pauvre Pauvre   Sum\n  aucun             3.7   22.0  25.7\n  primaire          8.5   50.8  59.3\n  secondaire        6.7   39.9  46.6\n  supérieur        19.5  116.8 136.3\n  Sum              38.3  229.6 267.9\n\n\nCe qui nous intéresse c’est la somme du chi2 de toutes les cases qui mesure la différence entre les distributions observées et théoriques. Plus le chi2 total est grand, plus il y a de chance qu’il existe une relation entre X et Y."
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#test-du-chi-2-1",
+    "href": "STAT2A_biv_quali_quali_diapos.html#test-du-chi-2-1",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "test du chi-2",
+    "text": "test du chi-2\nOn peut calculer beaucoup plus rapidement le chi-2 total d’un tableau et sa significativité en utilisant la fonction chisq.test() sans la stocker :\n\nchisq.test(tab)\n\n\n    Pearson's Chi-squared test\n\ndata:  tab\nX-squared = 267.94, df = 3, p-value &lt; 2.2e-16\n\n\nOn obtient directement la valeur du chi-2 du tableau (X-squared = 267.94) ainsi que le nombre de degrés de libertés (df = 3) et la significativité de la relation (p-value &lt; 2.2e-16)"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#interprétation-du-résultat-du-test",
+    "href": "STAT2A_biv_quali_quali_diapos.html#interprétation-du-résultat-du-test",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Interprétation du résultat du test",
+    "text": "Interprétation du résultat du test\nLe chi-2 total du tableau (267.9) sera d’autant plus élevé que la distribution observée s’éloigne de la distribution théorique. Plus le chi-2 augmente, moins il y a de chance que le hasard explique les différences entre valeurs observées et estimées. On peut alors faire un test pour connaître la probabilité que le chi-2 observé soit l’effet du hasard.\n\nle tableau possède 3 degré de liberté = (lignes - 1) x (colonnes - 1)\nle tableau possède un chi-2 égal à 267.9\nUn calcul effectué par un logiciel de statistique montre que la probabilité que cette valeur soit l’effet du hasard (p-value) est presque nulle p &lt;0.0001\n\nOn va donc rejeter H0 et accepter H1\nConclusion : On peut affirmer sans grand risque d’erreur (1 chance sur 10 000) qu’en Tunisie en 2021 il existe une relation significative entre le niveau de diplôme du chef de ménage et la situation de pauvreté"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#seuils-de-décision",
+    "href": "STAT2A_biv_quali_quali_diapos.html#seuils-de-décision",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Seuils de décision",
+    "text": "Seuils de décision\nDans l’exemple précédent, nous sommes tombé sur une relation très significative. Mais ce n’est pas toujours le cas. Pour fixer les ordres de grandeur, voici un tableau simple à retenir :\n\n\n\n\n\nTest..p.value.\nInterprétation\ncode\n\n\n\n\n&gt; 0.10\nNon significatif\nn.s\n\n\n0.05 à 0.10\nPresque significatif\n.\n\n\n0.01 à 0.05\nlégèrement significatif\n*\n\n\n0.001 à 0.01\nsignificatif\n**\n\n\n0.001 &lt;\ntrès significatif\n***\n\n\n\n\n\nLa taille de l’échantillon influence beaucoup le résultat du test du chi-2. Plus l’échantillon est grand, plus on a de chances de rejeter H0. ici nous avions 17000 personnes ce qui est considérable pourune enquête.\nMais qu’aurions nous observée si nous n’avions eu que 50, 100 ou 200 personnes ?"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#taille-de-léchantillon-n50",
+    "href": "STAT2A_biv_quali_quali_diapos.html#taille-de-léchantillon-n50",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Taille de l’échantillon (n=50)",
+    "text": "Taille de l’échantillon (n=50)\n\n\n\n\n\nEffectif\n\n\n\nNon pauvre\nPauvre\nSum\n\n\n\n\naucun\n8\n1\n9\n\n\nprimaire\n21\n3\n24\n\n\nsecondaire\n13\n0\n13\n\n\nsupérieur\n4\n0\n4\n\n\nSum\n46\n4\n50\n\n\n\n\n\n\n% en ligne\n\n\n\nNon pauvre\nPauvre\nTotal\n\n\n\n\naucun\n88.9\n11.1\n100\n\n\nprimaire\n87.5\n12.5\n100\n\n\nsecondaire\n100.0\n0.0\n100\n\n\nsupérieur\n100.0\n0.0\n100\n\n\nAll\n92.0\n8.0\n100\n\n\n\n\n\n\n\n\n\n\n\n\n    Pearson's Chi-squared test\n\ndata:  tab\nX-squared = 2.2569, df = 3, p-value = 0.5208"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#taille-de-léchantillon-n100",
+    "href": "STAT2A_biv_quali_quali_diapos.html#taille-de-léchantillon-n100",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Taille de l’échantillon (n=100)",
+    "text": "Taille de l’échantillon (n=100)\n\n\n\n\n\nEffectif\n\n\n\nNon pauvre\nPauvre\nSum\n\n\n\n\naucun\n17\n4\n21\n\n\nprimaire\n35\n6\n41\n\n\nsecondaire\n28\n1\n29\n\n\nsupérieur\n8\n1\n9\n\n\nSum\n88\n12\n100\n\n\n\n\n\n\n% en ligne\n\n\n\nNon pauvre\nPauvre\nTotal\n\n\n\n\naucun\n81.0\n19.0\n100\n\n\nprimaire\n85.4\n14.6\n100\n\n\nsecondaire\n96.6\n3.4\n100\n\n\nsupérieur\n88.9\n11.1\n100\n\n\nAll\n88.0\n12.0\n100\n\n\n\n\n\n\n\n\n\n\n\n\n    Pearson's Chi-squared test\n\ndata:  tab\nX-squared = 3.2722, df = 3, p-value = 0.3515"
+  },
+  {
+    "objectID": "STAT2A_biv_quali_quali_diapos.html#taille-de-léchantillon-n200",
+    "href": "STAT2A_biv_quali_quali_diapos.html#taille-de-léchantillon-n200",
+    "title": "STAT2 : Statistique bivariée",
+    "section": "Taille de l’échantillon (n=200)",
+    "text": "Taille de l’échantillon (n=200)\n\n\n\n\n\nEffectif\n\n\n\nNon pauvre\nPauvre\nSum\n\n\n\n\naucun\n29\n9\n38\n\n\nprimaire\n77\n15\n92\n\n\nsecondaire\n48\n4\n52\n\n\nsupérieur\n15\n3\n18\n\n\nSum\n169\n31\n200\n\n\n\n\n\n\n% en ligne\n\n\n\nNon pauvre\nPauvre\nTotal\n\n\n\n\naucun\n76.3\n23.7\n100\n\n\nprimaire\n83.7\n16.3\n100\n\n\nsecondaire\n92.3\n7.7\n100\n\n\nsupérieur\n83.3\n16.7\n100\n\n\nAll\n84.5\n15.5\n100\n\n\n\n\n\n\n\n\n\n\n\n\n    Pearson's Chi-squared test\n\ndata:  tab\nX-squared = 4.4277, df = 3, p-value = 0.2188"
+  }
+]

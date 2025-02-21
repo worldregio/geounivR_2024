@@ -1,0 +1,51 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "GeounivR 2024"
+  navbar:
+    left:
+      - href: index.qmd
+        text: "A propos"
+      - text: "STAT1"
+        menu:
+          - href: STAT1_Univariee_cours.qmd
+            text: "Statistique univariée - Cours"
+          - href: STAT1_Univariee_diapos.qmd
+            text: "Statistique univariée - Diaporama"
+      - text: "STAT2"
+        menu:
+          - href: STAT2A_biv_quali_quali_cours.qmd
+            text: "X et Y qualitatives - Cours"        
+          - href: STAT2A_biv_quali_quali_diapos.qmd
+            text: "X et Y qualitatives - Diaporama"
+          - href: STAT2B_biv_quali_quanti_cours.qmd
+            text: "Y quantitative et X qualitative - Cours" 
+          - href: STAT2B_biv_quali_quanti_diapos.qmd
+            text: "Y quantitative et X qualitative - Diaporama"             
+          - href: STAT2C_biv_quanti_quanti_cours.qmd
+            text: "X et Y quantitatives - Cours"  
+          - href: STAT2C_biv_quanti_quanti_diapos.qmd
+            text: "X et Y quantitatives - Diaporama"               
+      - text: "STAT3"
+        menu:
+          - href: MOD1_Analyse_de_variance_cours.qmd
+            text: "Analyse de variance simple et multiple"
+           
+    right: 
+      - icon: github # add icons as navbar buttons
+        href: https://github.com/worldregio/geounivR_2024
+        target: _blank
+  page-footer:
+    background: dark
+    left: Copyright 2025, FR CIST
+format:
+  html:
+    theme: 
+      light: minty    
+      dark: solar
+    css: styles.css
+    toc: true
+
+
