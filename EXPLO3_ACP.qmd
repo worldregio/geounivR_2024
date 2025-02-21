@@ -1,0 +1,351 @@
+---
+title: "EXPLO : Statistiques exploratoires"
+subtitle: "3. Analyse en composantes principales (ACP)"
+author: "Sophie Baudet-Michel, Claude Grasland"
+date: "2024-05-13"
+date-format: iso
+lang: fr
+format:
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    fontsize: 0.9em
+    toc: true
+    toc-depth: 3
+    toc-title: "."
+    bibliography: [bib.bib]
+    crossrefs-hover: false
+    theme: [yeti, style.scss]
+execute:
+  warning: false
+  message: false 
+knitr:
+  opts_chunk:
+    out.width: "100%"
+editor_options: 
+  chunk_output_type: console
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+
+```{r}
+## Packages utilitaire
+library(knitr)
+library(dplyr,quiet=T)
+
+### Package d'analyse des données
+library(FactoMineR)
+
+### Packages de cartographie
+library(sf, quietly-TRUE)
+library(mapsf)
+library(RColorBrewer)
+
+```
+
+
+## (3) ANALYSE EN COMPOSANTES PRINCIPALES (ACP)
+
+Au vu de l'exploration statistique, on a décidé de transformer la densité de population en logarithme. Le reste des variables demeure inchangé. On choisit comme précédemment l'exemple de la situation en 2004.
+
+### Tableau brut
+
+On constitue un tableau ne gardant que les 6 variables utiles. On ajoute en nom de lignes le code des gouvernorats
+
+```{r}
+don<-readRDS("EXPLO/don2004.RDS")
+
+# transforme la densité
+don$logden<-log(don$densi) 
+
+# choisit les variables
+tab<-don[,c("tailm", "logden","mobil", "acmig", "ordin","porta")]   
+
+# Ajoute un identifiant en numéro de ligne
+row.names(tab) <- don$code
+
+# Affiche le tableau
+kable(tab, digits=2, caption = "Tableau brut")
+```
+
+### Standardisation
+
+L'ACP normée va travailler non pas sur le tableau brut mais sur le tableau standardisé afin que les variables soient comparables. Pour éliminer les effets de taille et d'unité de mesure. Chaque variable aura alors le même poids.
+
+```{r}
+# applique la standardiation à chaque variable (2)
+tabstd <- apply(tab,2, scale) 
+
+# Ajoute les identifiants des unités 
+row.names(tabstd)<-don$code
+
+#Affiche le tableau
+kable(tabstd, 
+      digits=1,
+      caption="Tableau standardisé")
+```
+
+### Matrice de corrélation
+
+On peut examiner la matrice de corrélation entre les variables :
+
+```{r}
+matcor<-cor(tab)
+kable(matcor,digits=2, caption = "Matrice des corrélations")
+```
+
+
+? ajouter un corrélogramme ? 
+
+### Paramètres principaux
+
+```{r}
+
+param <- apply(tab, 2, summary)
+variance<-apply(tab,2,var)
+ectype<-apply(tab,2,sd)
+tabres<-rbind(param, variance,ectype)
+tabres<-data.frame(tabres)
+row.names(tabres)<-c("Minimum","Q1","Mediane","Moyenne","Q3","Maximum","Variance","Ecart-Type")
+
+kable(tabres, 
+      digits=1,
+      caption = "Paramètres principaux",
+      )
+
+
+
+```
+
+### ACP 
+On lance la procédure d'Analyse en Composantes Principales sur le tableau des variables initiales tab
+Pour cela on utilise la library FactoMineR
+Vocabulaire : composante = axe = facteurs
+
+
+```{r}
+# Réalisation de l'ACP : la sortie est une liste
+acp <- PCA(tab, 
+           graph=FALSE)
+
+# Nom des éléments de la liste
+names(acp)
+```
+
+La procédure a créé un objet acp qui est une liste de tableaux
+
+
+L'objet *acp* contient de nombreux résultats que nous pouvons extraire, puis analyser. Les résultats qui décrivent :
+- les composantes de l'ACP : Eig : les valeurs propres
+- les positions des variables du tableau initial sur les composantes
+Var : les informations relatives aux variables
+- les positions des individus sur les composantes
+Ind : les informations relatives aux individus
+
+
+### Analyse des valeurs propres
+
+On commence par récupérer les résultats sur les valeurs propres des composantes *eig*
+
+
+```{r}
+# Extrait les valeurs propres (eig = eigenvalue)
+Valprop<-acp$eig
+
+kable(Valprop, 
+      digits=2,
+      caption = "Les valeurs propres des composantes ",
+      col.names = c ("Valeurpropre", "PCVariance", "CumVariance"))
+```
+
+
+On représente graphiquement les valeurs propres 
+
+Syntaxe
+las = 2 #pour que les noms des barres soient à la verticale
+names.arg = VALPROP$Comp, #pour nommer chaque barre du graphique avec les noms d'axes
+
+```{r}
+VALPROP <- as.data.frame(Valprop)
+VALPROP$Comp <- c("F1", "F2", "F3", "F4", "F5", "F6")
+VALPROP <- VALPROP %>% rename(ValeurPropre='eigenvalue', 
+                    PCVariance='percentage of variance',
+                    CumVariance='cumulative percentage of variance')
+barplot(VALPROP$PCVariance,  
+        ylim = c(0, 80), col= "skyblue" , 
+        names.arg = VALPROP$Comp,
+      main = "Le % de variance des composantes",
+     xlab = "les composantes",
+     ylab = "le % de variance",
+     las = 2)
+```
+
+
+### Analyse des variables / composantes
+
+
+##### Qualités de représentation 
+
+- Extraction des qualités de représentations des variables sur les composantes (contenues dans *acp*)
+- Récupération des qualités de représentations des variables sur les composantes dans un dataframe
+*Var$cos2*
+- Nous n'analyserons que les 2 1ères composantes
+
+```{r}
+qualvar<-acp$var$cos2
+QUALVAR <- as.data.frame(qualvar)
+QUALVAR <- QUALVAR %>% select (Dim.1:Dim.2)
+QUALVAR <- QUALVAR %>% rename(QualF1='Dim.1', QualF2='Dim.2')
+kable(QUALVAR, 
+      digits=2,
+      caption = "Qualités de représentations des variables sur les composantes")
+```
+
+#### Contributions 
+
+*Var$contrib*
+```{r}
+ctrvar<-acp$var$contrib
+CTRVAR <- as.data.frame(ctrvar)
+CTRVAR <- CTRVAR %>% select (Dim.1:Dim.2)
+CTRVAR <- CTRVAR %>% rename(CtrF1='Dim.1', CtrF2='Dim.2')
+kable(CTRVAR, 
+      digits=2,
+      caption = "Contributions des variables aux composantes")
+```
+
+
+#### Corrélations
+
+```{r}
+corvar<-acp$var$cor
+CORVAR <- as.data.frame(corvar)
+CORVAR <- CORVAR %>% select(Dim.1:Dim.2)
+CORVAR <- CORVAR %>% rename(CorF1='Dim.1', CorF2='Dim.2')
+kable(CORVAR, 
+      digits=2,
+      caption = "Corrélations des variables avec les composantes")
+```
+
+#### Tableau de synthèse
+
+Réunion des descriptions des variables (QUAL, COR, CTR) sur les composantes dans un seul tableau
+```{r}
+ACPComp <- cbind.data.frame(CORVAR, CTRVAR,QUALVAR)
+kable(ACPComp, 
+      digits=2,
+      caption = "Descriptions des composantes par les variables")
+```
+
+
+#### Graphique n°1 : corrélations des variables avec les composantes
+
+Représentation graphique des positions des variables sur le 1er plan factoriels : 1-2 soit 86% de la variance du tableau de données 
+
+```{r}
+plot.PCA(acp,choix = "var",axes = c(1,2))
+```
+
+### Analyse des individus / composantes
+
+On fait la même chose pour les individus : on récupère les résultats pour les coordonnées et contributions des individus sur les composantes
+*ind$coord*
+*ind$contrib*
+On pourrait aussi récupérer les qualités de représentations (cos2)
+On ne travaille que sur les 2 premiers axes
+
+#### Tableau de synthèse
+
+```{r}
+cooind<-data.frame(acp$ind$coord)
+COOIND <- cooind %>% select(Dim.1:Dim.2)
+COOIND <- COOIND %>% rename(CorIndF1='Dim.1', CorIndF2='Dim.2')
+
+ctrind<-data.frame(acp$ind$contrib)
+CTRIND <- ctrind %>% select(Dim.1:Dim.2)
+CTRIND <- CTRIND %>% rename(CtrIndF1='Dim.1', CtrIndF2='Dim.2')
+
+ACPIndComp <- cbind.data.frame(COOIND, CTRIND)
+kable(ACPIndComp, 
+      digits=2,
+      caption = "Descriptions des composantes par les variables")
+
+```
+
+
+#### Graphique des coordonnées des individus sur les composantes
+
+```{r}
+plot.PCA(acp, choix = "ind",  cex = 0.8)
+```
+
+
+
+#### Cartographie des résultats de l'ACP
+
+On fait une jointure
+
+```{r}
+# Chargement du fonds de carte
+map<-readRDS("EXPLO/map2004.RDS")
+map<-map[,c("gou_code","gou_nom","geometry")]
+# Ajout du code aux résultats de l'ACP sur les individus
+ACPIndComp$gou_code<-rownames(ACPIndComp)
+# Jointure
+mapACP<-merge(map,ACPIndComp,by="gou_code")
+```
+
+
+On cartographie l'axe factoriel n°1
+
+
+
+```{r}
+
+
+# Choix des classes et paliers
+mybreaks<-c(-10,-3,-2,-1,0,1,2,3,10)
+mypal<-brewer.pal(n = 8,name="RdBu")
+
+# Carte des coordonnées des individus sur le 1er axe
+mf_map(x = mapACP, type = "choro",var="CorIndF1",
+       breaks = mybreaks,
+       pal=mypal,
+       leg_title = "Coordonnées", leg_pos="right")
+mf_map(x=mapACP, type="prop", var ="CtrIndF1",
+       col="gray",border="black",inches=0.05,
+       leg_title = "Contributions", leg_pos = "topright")
+mf_layout(title =  "Axe factoriel n°1 : Opposition entre les métropoles littorales et l'intérieur", 
+          credits = "Source : INS",
+          frame=T)
+
+
+```
+
+
+On cartographie l'axe factoriel n°2
+
+```{r}
+
+
+# Choix des classes et paliers
+mybreaks<-c(-10,-3,-2,-1,0,1,2,3,10)
+mypal<-brewer.pal(n = 8,name="RdBu")
+
+# Carte des coordonnées des individus sur le 1er axe
+mf_map(x = mapACP, type = "choro",var="CorIndF2",
+       breaks = mybreaks,
+       pal=mypal,
+       leg_title = "Coordonnées", leg_pos="right")
+mf_map(x=mapACP, type="prop", var ="CtrIndF2",
+       col="gray",border="black",inches=0.05,
+       leg_title = "Contributions", leg_pos = "topright")
+mf_layout(title = "Axe factoriel n°2 : Spécificité des zones intérieures du Nord et du Sud", 
+          credits = "Source : INS",
+          frame=T)
+
+
+```
+

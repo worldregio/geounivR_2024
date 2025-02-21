@@ -1,0 +1,128 @@
+---
+title: "EXPLO : Statistiques exploratoires"
+subtitle: "Classification ascendante hiérarchique (CAH)"
+author: "Sophie Baudet-Michel, Claude Grasland"
+date: "2024-05-13"
+date-format: iso
+lang: fr
+format:
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    fontsize: 0.9em
+    toc: true
+    toc-depth: 3
+    toc-title: "."
+    bibliography: [bib.bib]
+    crossrefs-hover: false
+    theme: [yeti, style.scss]
+execute:
+  warning: false
+  message: false 
+knitr:
+  opts_chunk:
+    out.width: "100%"
+editor_options: 
+  chunk_output_type: console
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+
+```{r}
+## Packages utilitaire
+library(knitr)
+library(dplyr,quiet=T)
+
+### Package d'analyse des données
+library(FactoMineR)
+
+### Packages de cartographie
+library(sf, quietly-TRUE)
+library(mapsf)
+library(RColorBrewer)
+
+```
+
+
+Préalablement à la classification on a transformé certaines variables et effectué une ACP.
+
+```{r}
+don<-readRDS("EXPLO/don2004.RDS")
+
+# transforme la densité
+don$logden<-log(don$densi) 
+
+# choisit les variables
+tab<-don[,c("tailm", "logden","mobil", "acmig", "ordin","porta")]   
+
+# Ajoute un identifiant en numéro de ligne
+row.names(tab) <- don$code
+
+# Affiche le tableau
+kable(tab, digits=2, caption = "Tableau brut")
+
+# Réalisation de l'ACP : la sortie est une liste
+acp <- PCA(tab, 
+           graph=FALSE)
+
+```
+
+
+## (4) CLASSIFICATION ASCENDANTE HIERARCHIQUE (CAH)
+
+
+### Réalisation de la CAH
+
+```{r}
+cah<-HCPC(acp,nb.clust = 4)
+tabres<-cah$data.clust
+```
+
+
+### Aide à l'interprétation du profil des classes
+
+```{r}
+catdes(tabres,num.var = 7)
+```
+
+### Visualisation du profils des classes
+
+```{r}
+plot.catdes(catdes(tabres,7,proba = 1),level = 1,barplot = T)
+```
+
+
+### Jointure du fonds de carte et des résultats de la CAH
+
+```{r}
+# Chargement du fonds de carte
+map<-readRDS("EXPLO/map2004.RDS")
+map<-map[,c("gou_code","gou_nom","geometry")]
+# Ajout du code aux résultats de l'ACP sur les individus
+tabres$gou_code<-rownames(tabres)
+# Jointure
+mapCAH<-merge(map,tabres,by="gou_code")
+```
+
+### Cartographie des résultats de la CAH
+
+```{r}
+par(mfrow=c(1,1))
+# Ajout de noms aux classes
+mapCAH$classes<-as.factor(mapCAH$clust)
+levels(mapCAH$classes)<- c("1 : Spécifique",
+                           "2 : Défavorisé",
+                           "3 : Favorisé",
+                           "4 : Très favorisé")
+mypal=c("lightgreen","lightyellow","orange","red")
+
+# Carte des coordonnées des individus sur le 1er axe
+mf_map(x = mapCAH, type = "typo",var="classes",
+       leg_title = "Classes", leg_pos="right",
+       pal=mypal)
+mf_layout(title = "Typologie des gouvernorats", 
+          credits = "Source : INS",
+          frame=T)
+```

@@ -8,13 +8,17 @@ website:
     left:
       - href: index.qmd
         text: "A propos"
-      - text: "STAT1"
+      - text: "INTRODUCTION"
+        menu:
+          - href: INTRO_pedagogique.qmd
+            text: "Intérêt pédagogique de R"
+      - text: "STAT1 - Univarié"
         menu:
           - href: STAT1_Univariee_cours.qmd
             text: "Statistique univariée - Cours"
           - href: STAT1_Univariee_diapos.qmd
             text: "Statistique univariée - Diaporama"
-      - text: "STAT2"
+      - text: "STAT2 - Bivarié"
         menu:
           - href: STAT2A_biv_quali_quali_cours.qmd
             text: "X et Y qualitatives - Cours"        
@@ -27,12 +31,35 @@ website:
           - href: STAT2C_biv_quanti_quanti_cours.qmd
             text: "X et Y quantitatives - Cours"  
           - href: STAT2C_biv_quanti_quanti_diapos.qmd
-            text: "X et Y quantitatives - Diaporama"               
-      - text: "STAT3"
+            text: "X et Y quantitatives - Diaporama" 
+      - text: "STAT3 - Exploration"
+        menu:
+          - href: EXPLO1_Prepare_data.qmd
+            text: "Etape 1. Préparation des données"    
+          - href: EXPLO2_Exploration_stat_carto.qmd
+            text: "Etape 2. Exploration univariée"  
+          - href: EXPLO3_ACP.qmd
+            text: "Etape 3. Analyse en composantes principales"   
+          - href: EXPLO4_CAH.qmd
+            text: "Etape 4. Classification ascendante hiérarchique"              
+          - href: EXPLO_gouv_2004.qmd
+            text: "Synthèse : les gouvernorats en 2004"   
+          - href: EXPLO_gouv_2014.qmd
+            text: "Exercice : les gouvernorats en 2014"  
+      - text: "STAT4 - Modélisation"
         menu:
           - href: MOD1_Analyse_de_variance_cours.qmd
-            text: "Analyse de variance simple et multiple"
-           
+            text: "Analyse de variance simple et multiple (cours)"
+          - href: MOD2_Regression_lineaire_cours.qmd
+            text: "Régression linéaire simple (cours)"    
+          - href: MOD3_Regression_non_lineaire_cours.qmd
+            text: "Régression non linéaire (cours)" 
+      - text: "ANSPA : Analyse spatiale"
+        menu:
+          - href: ANSPA_Semis_de_points_cours.qmd
+            text: "Analyse d'un semis de points (cours)"  
+          - href: ANSPA_Semis_de_points_diapos.qmd
+            text: "Analyse d'un semis de points (diapos)"   
     right: 
       - icon: github # add icons as navbar buttons
         href: https://github.com/worldregio/geounivR_2024

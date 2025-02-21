@@ -1,0 +1,231 @@
+---
+title: "EXPLO : Statistiques exploratoires"
+subtitle: "2.Exploration statistique et cartographie"
+author: "Claude Grasland, Sophie Baudet-Michel"
+date: "2024-05-13"
+date-format: iso
+lang: fr
+format:
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    fontsize: 0.9em
+    toc: true
+    toc-depth: 3
+    toc-title: "."
+    bibliography: [bib.bib]
+    crossrefs-hover: false
+    theme: [yeti, style.scss]
+execute:
+  warning: false
+  message: false 
+knitr:
+  opts_chunk:
+    out.width: "100%"
+editor_options: 
+  chunk_output_type: console
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+
+```{r}
+library(knitr)
+library(sf)
+library(mapsf)
+```
+
+## (2) EXPLORATION
+
+Avant de procéder à une ACP, on effectue un certain nombre d'analyse sur les variables qui seront utilisées. On prend ici l'exemple des données de 2004.
+
+```{r}
+don<-readRDS("EXPLO/don2004.RDS") # recharge le fichier
+head(don,3)  # Affiche les 3 premières lignes
+tail(don,3)  # Affiche les 3 dernières lignes
+```
+
+
+
+### Exploration statistique
+
+On regarde pour chaque variable retenue la forme de sa distribution afin de procéder éventuellement à des transformations si celle-ci est trop éloignée d'une forme gaussienne.
+
+#### Taille moyenne des ménages (*tailm*)
+
+```{r}
+
+X<-don$tailm
+
+# résumé statistique
+summary(X)
+
+# graphique en R-base
+hist(X)
+boxplot(X, horizontal=T)
+
+
+```
+
+
+#### Densité de population (*densi*)
+
+```{r}
+X<-don$densi
+summary(X)
+hist(X)
+boxplot(X, horizontal=T)
+```
+
+On essaye une transformation logarithmique
+
+```{r}
+X<-log(don$densi)
+summary(X)
+hist(X)
+boxplot(X, horizontal=T)
+```
+
+C'est mieux !
+
+#### Taux de mobilité (mobil)
+
+```{r}
+X<-don$mobil
+summary(X)
+hist(X)
+boxplot(X, horizontal=T)
+```
+
+
+#### Taux d'accroissement migratoire (acmig)
+
+```{r}
+X<-don$acmig
+summary(X)
+hist(X)
+boxplot(X, horizontal=T)
+```
+
+
+#### Taux d'équipement des ménages en téléphones mobiles (*mobil*)
+
+```{r}
+X<-don$mobil
+summary(X)
+hist(X)
+boxplot(X, horizontal=T)
+```
+
+#### Taux d'équipement des ménages en ordinateur (*ordin*)
+
+```{r}
+X<-don$ordin
+summary(X)
+hist(X)
+boxplot(X, horizontal=T)
+```
+
+### Exploration cartographique
+
+On procède à une cartographie rapide des six variables sous forme de planches utilisant la même méthode de discrétisation (quartiles)
+
+#### Données structurelles
+
+On compare ici la taille moyenne des ménages et la densité de population
+
+
+```{r}
+# Charge le fichier stat + geom
+map<-readRDS("EXPLO/map2004.RDS")
+
+
+# Définit un cadre avec deux cartes côte à côte
+par(mfrow=c(1,2)) # une ligne et deux colonnes
+
+# Carte n°1
+mf_map(x = map, 
+       type = "choro",
+       var="tailm",
+       breaks = "quantile",
+       nbreaks=4, 
+       leg_title = "quartiles")
+mf_layout(title = "Taille moyenne des ménages", 
+          credits = "Source : INS",
+          frame=T)
+
+# Carte n°2 
+mf_map(x = map, type = "choro",var="densi",
+       breaks = "quantile",nbreaks=4, leg_title = "quartiles")
+mf_layout(title = "Densité de population", 
+          credits = "Source : INS",
+          frame=T)
+
+
+```
+
+#### Données démographiques
+
+On compare ici le taux de mobilité et le taux d'accroissement migratoire
+
+
+```{r}
+map<-readRDS("EXPLO/map2004.RDS")
+
+# Définit un cadre avec deux cartes côte à côte
+par(mfrow=c(1,2))
+
+# Carte n°1
+mf_map(x = map,
+       type = "choro",
+       var="mobil",
+       breaks = "quantile",
+       nbreaks=4, 
+       leg_title = "quartiles")
+mf_layout(title = "Taux de mobilité", 
+          credits = "Source : INS",
+          frame=T)
+
+# Carte n°2 
+mf_map(x = map, 
+       type = "choro",
+       var="acmig",
+       breaks = "quantile",
+       nbreaks=4, 
+       leg_title = "quartiles")
+mf_layout(title = "Taux d'accroissement migratoire", 
+          credits = "Source : INS",
+          frame=T)
+
+
+```
+
+
+#### Données d'équipement 
+
+On compare ici le taux d'équipement des ménages en ordinateur et téléphones portables
+
+
+```{r}
+map<-readRDS("EXPLO/map2004.RDS")
+
+# Définit un cadre avec deux cartes côte à côte
+par(mfrow=c(1,2))
+
+# Carte n°1
+mf_map(x = map, type = "choro",var="porta",
+       breaks = "quantile",nbreaks=4, leg_title = "quartiles")
+mf_layout(title = "Equipement en téléphones portables", 
+          credits = "Source : INS",
+          frame=T)
+
+# Carte n°2 
+mf_map(x = map, type = "choro",var="ordin",
+       breaks = "quantile",nbreaks=4, leg_title = "quartiles")
+mf_layout(title = "Equipement en ordinateurs", 
+          credits = "Source : INS",
+          frame=T)
+
+
+```

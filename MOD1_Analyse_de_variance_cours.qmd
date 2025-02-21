@@ -1,6 +1,6 @@
 ---
-title: "ANALYSE DE VARIANCE"
-subtitle: "GEO UNIV'R Tunisie 2024"
+title: "STAT3 : MODELISATION"
+subtitle: "Analyse de variance simple et multiple"
 date: "2024-05-13"
 date-format: iso
 author: "Claude Grasland, Malika Madelin"

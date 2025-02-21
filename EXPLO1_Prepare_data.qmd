@@ -1,0 +1,154 @@
+---
+title: "EXPLO : Statistiques exploratoires"
+subtitle: "1.Préparation des données"
+author: "Claude Grasland, Sophie Baudet-Michel"
+date: "2024-05-13"
+date-format: iso
+lang: fr
+format:
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    fontsize: 0.9em
+    toc: true
+    toc-depth: 3
+    toc-title: "."
+    bibliography: [bib.bib]
+    crossrefs-hover: false
+    theme: [yeti, style.scss]
+execute:
+  warning: false
+  message: false 
+knitr:
+  opts_chunk:
+    out.width: "100%"
+editor_options: 
+  chunk_output_type: console
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+
+
+```{r}
+library(knitr)
+library(sf)
+```
+
+
+
+L'analyse multivariée suppose une préparation des données à la fois sur le plan statistique et sur le plan cartographie. On va prendre ici l'exemple de la préparation de fichiers pour les données de 2004 par gouvernorat. Mais on pourra facilement effectuer la même analyse par délégation ou pour l'année 2014.
+
+## Données statistiques
+
+### Importation du fichier .csv
+
+Les données se trouvent dans un dossier contenant une large base de données sur les résultats des recensements de 2004 et 2014 par gouvernorats
+
+```{r}
+# Importation du fichier .csv
+don <- read.table("RP_Tunisie/data/don_gou.csv", 
+                  header = TRUE,   # Il y a un en-tête
+                  sep = ";",       # le séparateur est ;
+                  encoding = "UTF-8"  # Encodage pour français et arabe
+                  )
+kable(head(don))
+```
+
+### Création et recodage des variables
+
+```{r}
+# Création ou recodage des variables
+code<-don$gou_code
+nom<-don$gou_nom
+popto <- don$popto_2004
+menag <- don$menag_2004
+tailm <- don$popto_2004/don$menag_2004
+densi <- don$popto_2004/don$surfa_2010
+#urban <- 100*don$popco_2004/don$popto_2004
+mobil <- 100*(don$immig_2004+don$emigr_2004)/don$popto_2004
+acmig <- 100*(don$immig_2004-don$emigr_2004)/don$popto_2004
+ordin <- 100*don$ordin_2004/don$menag_2004
+porta <- 100*don$porta_2004/don$menag_2004
+
+# Affichage
+tab<-data.frame(code,nom, popto,menag, tailm, densi,mobil, acmig, ordin, porta)
+kable(tab, 
+      digits = c(0,0,0,0,2,1,1,1,1,1), # decimales par colonnes
+      caption = "Tableau de données 2004"   # Titre du tableau
+      )
+```
+
+
+### Sauvegarde dans un nouveau dossier
+
+On enregistre les données dans un dossier appelé EXPLO au format .csv et au format .RDS
+
+
+```{r}
+# Sauvegarde aux formats .RDS et .csv
+saveRDS(tab, "EXPLO/don2004.RDS") # sauvegarde au format interne de R
+
+write.table(tab, "EXPLO/don2004.csv",
+            sep=";", 
+            row.names=F,
+            fileEncoding = "UTF-8")
+```
+
+
+## Données géométriques
+
+
+### Importation
+On va importer maintenant le fonds cartographique correspondant aux unités spatiales choisies (ici, les gouvernorats).
+
+```{r}
+# Importation du shapefile des gouvernorats à l'aide de sf
+map<-sf::st_read("RP_Tunisie/geom/map_gou.shp")
+```
+
+### Visualisation
+
+On cartographie rapidement le fonds de carte pour voir s'il est correct
+
+```{r}
+plot(map$geometry)
+```
+
+
+
+
+### Jointure
+
+On effectue ensuite la jointure avec les données statistiques et on obtient un fichier de type sf (spatial features)
+
+```{r}
+# Jointure des données statistiques et géométriques
+map<- merge(map, tab, by.x="gou_code",by.y="code")
+class(map)
+```
+
+### Vérification
+
+On vérifie que la jointure est correcte en cartographiant une variable rapidement :
+
+```{r}
+plot(map["ordin"])
+```
+
+### Exportation
+
+On exporte dans le même dossier que celui où l'on a sauvegardé les données statistiques en utilisant différents formats : .RDS, .geojson, .shp 
+
+```{r}
+
+# Sauvegarde aux formats .RDS  (et éventuellement .shp et  .geojson)
+
+saveRDS(map, "EXPLO/map2004.RDS") ## Format interne de R
+
+#sf::st_write(map, "EXPLO/map2004.geojson",delete_dsn = T)  ## Format geojson
+
+#sf::st_write(map, "EXPLO/map2004.shp",delete_dsn = T)
+
+```
