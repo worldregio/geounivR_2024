@@ -6,4 +6,18 @@ format: html
 
 ## GEOUNIVR 2024
 
-bla bla bla
+![Participants](img/logo.png)
+
+
+### Comité d'organisation
+
+L'école d'été GEONUIV'R 2024 a été organisé conjointement par la FALSH de l'Université de Sfax, l'Université Paris Cité et la FR 2007 CIST avec le soutien des équipes de recherche SYFACTE, Géographie-cités, Prodig, Geoteca et Riate. Le comité d'organisation était composé de Claude Grasland et Salem Dahech pour l'Université Paris Cité, Riadh Bouaziz et Sami Charfi pour l'Université de Sfax. 
+
+![Comité d'organisation : de gauche à droite : Me la doyenne de la FALSH, C. Grasland, R. Bouaziz, A. Dahech et S. Charfi ](img/geounivr_organisation.jpg)
+
+### Participants
+
+L'école d'été a rassemblé 30 participants parmi lesquels 10 enseignants-chercheurs ou ingénieurs côté français et 20 enseignants-chercheurs côté tunisien. Son objectif était de former des formateurs et de co-construire ensemble des enseignements reproductibles en statistique, cartographie et analyse spatiale avec le logiciel R.
+
+![Les 30 participants lors de la cérémonie de clôture](img/geounivr_groupe.jpg)
+

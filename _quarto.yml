@@ -4,22 +4,36 @@ project:
 
 website:
   title: "GeounivR 2024"
-  navbar:
-    left:
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
       - href: index.qmd
         text: "A propos"
-      - text: "INTRODUCTION"
-        menu:
+      - section: "INTRO"
+        contents:
+          - href: INTRO_programmR.html
+            text: "Programmer en R"  
           - href: INTRO_pedagogique.qmd
-            text: "Intérêt pédagogique de R"
-      - text: "STAT1 - Univarié"
-        menu:
+            text: "Rédiger un cours avec R"
+          - href: INTRO_importation.html
+            text: "Importer des données dans R"  
+      - section: "GEOMATIQUE"
+        contents:
+          - href: CARTO_vecteurs.qmd
+            text: "Manipulation de données vecteurs (sf)" 
+          - href: CARTO_rasters.html
+            text: "Manipulation de données rasters (terra)"
+          - href: https://neocarto.github.io/geounivr2024/VEN1_geoviz_intro/docs/index.html
+            text: "Cartographie dynamique (observable)"            
+      - section: "STAT1-Univar."
+        contents:
           - href: STAT1_Univariee_cours.qmd
             text: "Statistique univariée - Cours"
           - href: STAT1_Univariee_diapos.qmd
             text: "Statistique univariée - Diaporama"
-      - text: "STAT2 - Bivarié"
-        menu:
+      - section: "STAT2-Bivar."
+        contents:
           - href: STAT2A_biv_quali_quali_cours.qmd
             text: "X et Y qualitatives - Cours"        
           - href: STAT2A_biv_quali_quali_diapos.qmd
@@ -32,8 +46,8 @@ website:
             text: "X et Y quantitatives - Cours"  
           - href: STAT2C_biv_quanti_quanti_diapos.qmd
             text: "X et Y quantitatives - Diaporama" 
-      - text: "STAT3 - Exploration"
-        menu:
+      - section: "STAT3-Mult."
+        contents:
           - href: EXPLO1_Prepare_data.qmd
             text: "Etape 1. Préparation des données"    
           - href: EXPLO2_Exploration_stat_carto.qmd
@@ -46,16 +60,16 @@ website:
             text: "Synthèse : les gouvernorats en 2004"   
           - href: EXPLO_gouv_2014.qmd
             text: "Exercice : les gouvernorats en 2014"  
-      - text: "STAT4 - Modélisation"
-        menu:
+      - section: "STAT4-Reg."
+        contents:
           - href: MOD1_Analyse_de_variance_cours.qmd
             text: "Analyse de variance simple et multiple (cours)"
           - href: MOD2_Regression_lineaire_cours.qmd
             text: "Régression linéaire simple (cours)"    
           - href: MOD3_Regression_non_lineaire_cours.qmd
             text: "Régression non linéaire (cours)" 
-      - text: "ANSPA : Analyse spatiale"
-        menu:
+      - section: "ANSPA : Analyse spatiale"
+        contents:
           - href: ANSPA_Semis_de_points_cours.qmd
             text: "Analyse d'un semis de points (cours)"  
           - href: ANSPA_Semis_de_points_diapos.qmd

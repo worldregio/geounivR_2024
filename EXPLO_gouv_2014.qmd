@@ -15,6 +15,7 @@ format:
     toc-title: "."
     bibliography: [bib.bib]
     crossrefs-hover: false
+    css: custom.css
     theme: [yeti, style.scss]
 execute:
   warning: false
@@ -90,7 +91,6 @@ popto <- don$popto_2014
 menag <- don$menag_2014
 tailm <- don$popto_2014/don$menag_2014
 densi <- don$popto_2014/don$surfa_2010
-#urban <- 100*don$popco_2004/don$popto_2004
 mobil <- 100*(don$immig_2014+don$emigr_2014)/don$popto_2014
 acmig <- 100*(don$immig_2014-don$emigr_2014)/don$popto_2014
 ordin <- 100*don$ordin_2014/don$menag_2014
@@ -105,7 +105,7 @@ porta <- 100*don$porta_2014/don$menag_2014
 tab<-data.frame(code,nom, popto,menag, tailm, densi,mobil, acmig, ordin, porta)
 kable(tab, 
       digits = c(0,0,0,0,2,1,1,1,1,1), # decimales par colonnes
-      caption = "Tableau de données 2004"   # Titre du tableau
+      caption = "Tableau de données 2014"   # Titre du tableau
       )
 ```
 
@@ -706,7 +706,7 @@ mypal=c("lightgreen","lightyellow","orange","red")
 mf_map(x = mapCAH, type = "typo",var="classes",
        leg_title = "Classes", leg_pos="right",
        pal=mypal)
-mf_layout(title = "Typologie des gouvernorats", 
+mf_layout(title = "Typologie des gouvernorats en 2014", 
           credits = "Source : INS",
           frame=T)
 ```
