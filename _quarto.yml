@@ -10,7 +10,7 @@ website:
     contents:
       - href: index.qmd
         text: "A propos"
-      - section: "INTRO"
+      - section: "INTRODUCTION"
         contents:
           - href: INTRO_programmR.html
             text: "Programmer en R"  
@@ -18,7 +18,7 @@ website:
             text: "Rédiger un cours avec R"
           - href: INTRO_importation.html
             text: "Importer des données dans R"  
-      - section: "GEOMATIQUE"
+      - section: "CARTO & GEOMATIQUE"
         contents:
           - href: CARTO_vecteurs.qmd
             text: "Manipulation de données vecteurs (sf)" 
@@ -26,13 +26,13 @@ website:
             text: "Manipulation de données rasters (terra)"
           - href: https://neocarto.github.io/geounivr2024/VEN1_geoviz_intro/docs/index.html
             text: "Cartographie dynamique (observable)"            
-      - section: "STAT1-Univar."
+      - section: "STATISTIQUE UNIVARIEE"
         contents:
           - href: STAT1_Univariee_cours.qmd
             text: "Statistique univariée - Cours"
           - href: STAT1_Univariee_diapos.qmd
             text: "Statistique univariée - Diaporama"
-      - section: "STAT2-Bivar."
+      - section: "STATISTIQUE BIVARIEE"
         contents:
           - href: STAT2A_biv_quali_quali_cours.qmd
             text: "X et Y qualitatives - Cours"        
@@ -46,7 +46,7 @@ website:
             text: "X et Y quantitatives - Cours"  
           - href: STAT2C_biv_quanti_quanti_diapos.qmd
             text: "X et Y quantitatives - Diaporama" 
-      - section: "STAT3-Mult."
+      - section: "STATISTIQUE MULTIVARIEE."
         contents:
           - href: EXPLO1_Prepare_data.qmd
             text: "Etape 1. Préparation des données"    
@@ -60,7 +60,7 @@ website:
             text: "Synthèse : les gouvernorats en 2004"   
           - href: EXPLO_gouv_2014.qmd
             text: "Exercice : les gouvernorats en 2014"  
-      - section: "STAT4-Reg."
+      - section: "MODELES DE REGRESSION"
         contents:
           - href: MOD1_Analyse_de_variance_cours.qmd
             text: "Analyse de variance simple et multiple (cours)"
@@ -68,7 +68,7 @@ website:
             text: "Régression linéaire simple (cours)"    
           - href: MOD3_Regression_non_lineaire_cours.qmd
             text: "Régression non linéaire (cours)" 
-      - section: "ANSPA : Analyse spatiale"
+      - section: "ANALYSE SPATIALE"
         contents:
           - href: ANSPA_Semis_de_points_cours.qmd
             text: "Analyse d'un semis de points (cours)"  
